@@ -1,0 +1,41 @@
+General Steps:
+
+-----------------
+On laptop/desktop
+-----------------
+clone github repo
+git clone git@github.com:wcannon/saltconf2015.git
+
+Set up aws credentials
+----------------------
+aws configure
+
+
+Set up "permanent" s3 bucket and iam profiles
+* Note: bucket name differences will require a slight change in commands below
+---------------------------------------------
+cd into saltconf2015/cloudformation_templates (from git clone subdir)
+
+aws cloudformation create-stack --region us-west-2 --stack-name saltconf_s3_iam --template-body s3_iam.json ParameterKey=BucketName,ParameterValue=saltconf2015 --capabilities CAPABILITY_IAM
+** get output values of cloudformation stack (either in aws cloudformation console, or via aws cli tools)
+
+cd into saltconf2015/
+
+Put necessary scripts and resource dirs in new s3 bucket (example for my s3 bucket named saltconf2015bucket)
+aws s3 sync --recursive s3_bucket_contents/ s3://saltconf2015
+
+
+Create vpc and etc. with autoscaling group
+---------------------------------------------
+** requires the output values of the saltconf_s3_iam stack creation (e.g. InstanceProfile)
+aws cloudformation create-stack --region us-west-2 --stack-name saltconf_vpc_singlemaster --template-body saaltconf_vpc_singlemaster.json ParameterKey=BucketName,ParameterValue=saltconf2015 ParameterKey=Region,ParameterValue=us-west-2 ParameterKey=SSHFrom,ParameterValue=50.137.210.143/32 ParameterKey=InstanceType,ParameterValue=m3.medium ParameterKey=InstanceProfile,ParameterValue=saltconf2015demo1-S3SaltConf2015InstanceProfile-9BN5ZWWI331Nv  
+
+
+
+
+Reference commands:
+# Create Stack
+aws cloudformation create-stack --region us-west-2 --stack-name saltconf_s3_iam --template-body file:////home/wcannon/hpulse-code/DevOps/cloudformation/s3_iam.json ParameterKey=BucketName,ParameterValue=saltconf2015 --capabilities CAPABILITY_IAM
+# Update stack
+aws cloudformation update-stack --region us-west-2 --stack-name saltconf_s3_iam --template-body file:////home/wcannon/hpulse-code/DevOps/cloudformation/s3_iam.json ParameterKey=BucketName,ParameterValue=saltconf2015 --capabilities CAPABILITY_IAM
+

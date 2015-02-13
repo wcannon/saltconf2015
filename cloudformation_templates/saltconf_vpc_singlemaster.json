@@ -1,0 +1,382 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+
+  "Description" : "This CloudFormation template will instantiate the hospitality pulse highly available infrastructure.  Using CF to create a stack results in an environment making use of two availability zones.",
+
+  "Parameters" : {
+
+    "KeyName" : {
+      "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the bastion host",
+      "Type" : "String",
+      "MinLength": "1",
+      "MaxLength": "64",
+      "AllowedPattern" : "[-_ a-zA-Z0-9]*",
+      "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores."
+    },
+   
+    "Region" : {
+       "Description" : "Name of an AWS region",
+       "Type": "String",
+       "AllowedValues" : [ "us-east-1", "us-west-1", "us-west-2", "eu-west-1", "ap-southeast-1", "ap-southeast-2", "ap-northeast-1", "sa-east-1", "eu-central-1"],
+       "Default" : "us-west-2"
+    },
+
+    "SSHFrom" : {
+      "Description" : "Lockdown SSH access to the bastion host (default can be accessed from anywhere)",
+      "Type" : "String",
+      "MinLength": "9",
+      "MaxLength": "18",
+      "Default" : "0.0.0.0/0",
+      "AllowedPattern" : "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription" : "must be a valid CIDR range of the form x.x.x.x/x."
+    },
+
+    "InstanceType" : {
+      "Description" : "Size of an instance",
+      "Type" : "String",
+      "AllowedValues" : [ "m3.medium", "m3.large", "m3.xlarge"],
+      "Default" : "m3.medium"
+    },
+
+    "InstanceProfile" : {
+      "Description" : "The IAM instance profile to use for access to an S3 bucket",
+      "Type" : "String",
+      "Default" : "saltconf2015demo1-S3SaltConf2015InstanceProfile-9BN5ZWWI331N"
+    },
+
+    "BucketName" : {
+      "Description" : "Name of a new s3 bucket to create",
+      "Type" : "String",
+      "MinLength": "1",
+      "MaxLength": "128",
+      "AllowedPattern" : "[-_ a-zA-Z0-9]*",
+      "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores.",
+      "Default" : "saltconf2015"
+    }
+
+  },
+
+  "Mappings" : {
+
+    "AWSInstanceType2Arch" : {
+      "t1.micro"    : { "Arch" : "64" },
+      "m1.small"    : { "Arch" : "64" },
+      "m1.medium"   : { "Arch" : "64" },
+      "m1.large"    : { "Arch" : "64" },
+      "m1.xlarge"   : { "Arch" : "64" },
+      "m2.xlarge"   : { "Arch" : "64" },
+      "m2.2xlarge"  : { "Arch" : "64" },
+      "m2.4xlarge"  : { "Arch" : "64" },
+      "m3.medium"   : { "Arch" : "64" },
+      "m3.large"    : { "Arch" : "64" },
+      "m3.xlarge"   : { "Arch" : "64" },
+      "c1.medium"   : { "Arch" : "64" },
+      "c1.xlarge"   : { "Arch" : "64" },
+      "cc1.4xlarge" : { "Arch" : "64Cluster" },
+      "cc2.8xlarge" : { "Arch" : "64Cluster" },
+      "cg1.4xlarge" : { "Arch" : "64GPU" }
+    },
+
+    "AWSRegionArch2AMI" : {
+      "us-east-1"      : { "32" : "ami-a0cd60c9", "64" : "ami-aecd60c7", "64Cluster" : "ami-a8cd60c1",      "64GPU" : "ami-eccf6285" },
+      "us-west-2"      : { "32" : "ami-46da5576", "64" : "ami-29ebb519", "64Cluster" : "NOT_YET_SUPPORTED", "64GPU" : "NOT_YET_SUPPORTED" },
+      "us-west-1"      : { "32" : "ami-7d4c6938", "64" : "ami-734c6936", "64Cluster" : "NOT_YET_SUPPORTED", "64GPU" : "NOT_YET_SUPPORTED" },
+      "eu-west-1"      : { "32" : "ami-61555115", "64" : "ami-6d555119", "64Cluster" : "ami-67555113",      "64GPU" : "NOT_YET_SUPPORTED" },
+      "ap-southeast-1" : { "32" : "ami-220b4a70", "64" : "ami-3c0b4a6e", "64Cluster" : "NOT_YET_SUPPORTED", "64GPU" : "NOT_YET_SUPPORTED" },
+      "ap-northeast-1" : { "32" : "ami-2a19aa2b", "64" : "ami-2819aa29", "64Cluster" : "NOT_YET_SUPPORTED", "64GPU" : "NOT_YET_SUPPORTED" },
+      "sa-east-1"      : { "32" : "ami-f836e8e5", "64" : "ami-fe36e8e3", "64Cluster" : "NOT_YET_SUPPORTED", "64GPU" : "NOT_YET_SUPPORTED" }
+    },
+
+    "VpcIpMap" : {
+      "us-east-1" :  {
+           "VpcCidr" : "10.0.0.0/16",
+           "az1" : "us-east-1a",
+           "az2" : "us-east-1c",
+           "az1admin" : "10.0.0.0/24",
+           "az1data"  : "10.0.1.0/24",
+           "az1web"   : "10.0.2.0/24",
+           "az2admin" : "10.0.10.0/24",
+           "az2data"  : "10.0.11.0/24",
+           "az2web"   : "10.0.12.0/24"
+      },
+      "us-west-1" :  {
+           "VpcCidr" : "10.1.0.0/16",
+           "az1" : "us-west-1b",
+           "az2" : "us-west-1c",
+           "az1admin" : "10.1.0.0/24",
+           "az1data"  : "10.1.1.0/24",
+           "az1web"   : "10.1.2.0/24",
+           "az2admin" : "10.1.10.0/24",
+           "az2data"  : "10.1.11.0/24",
+           "az2web"   : "10.1.12.0/24"
+      },
+      "us-west-2" :  {
+           "VpcCidr" : "10.2.0.0/16",
+           "az1" : "us-west-2a",
+           "az2" : "us-west-2b",
+           "az1admin" : "10.2.0.0/24",
+           "az1data"  : "10.2.1.0/24",
+           "az1web"   : "10.2.2.0/24",
+           "az2admin" : "10.2.10.0/24",
+           "az2data"  : "10.2.11.0/24",
+           "az2web"   : "10.2.12.0/24"
+      },
+      "eu-west-1" :  {
+           "VpcCidr" : "10.3.0.0/16",
+           "az1" : "eu-west-1a",
+           "az2" : "eu-west-1b",
+           "az1admin" : "10.3.0.0/24",
+           "az1data"  : "10.3.1.0/24",
+           "az1web"   : "10.3.2.0/24",
+           "az2admin" : "10.3.10.0/24",
+           "az2data"  : "10.3.11.0/24",
+           "az2web"   : "10.3.12.0/24"
+      },
+      "ap-southeast-1" :  {
+           "VpcCidr" : "10.4.0.0/16",
+           "az1" : "ap-southeast-1a",
+           "az2" : "ap-southeast-1b",
+           "az1admin" : "10.4.0.0/24",
+           "az1data"  : "10.4.1.0/24",
+           "az1web"   : "10.4.2.0/24",
+           "az2admin" : "10.4.10.0/24",
+           "az2data"  : "10.4.11.0/24",
+           "az2web"   : "10.4.12.0/24"
+      },
+      "ap-southeast-2" :  {
+           "VpcCidr" : "10.5.0.0/16",
+           "az1" : "ap-southeast-2a",
+           "az2" : "ap-southeast-2b",
+           "az1admin" : "10.5.0.0/24",
+           "az1data"  : "10.5.1.0/24",
+           "az1web"   : "10.5.2.0/24",
+           "az2admin" : "10.5.10.0/24",
+           "az2data"  : "10.5.11.0/24",
+           "az2web"   : "10.5.12.0/24"
+      },
+      "ap-northeast-1" :  {
+           "VpcCidr" : "10.6.0.0/16",
+           "az1" : "ap-northeast-1a",
+           "az2" : "ap-northeast-1c",
+           "az1admin" : "10.6.0.0/24",
+           "az1data"  : "10.6.1.0/24",
+           "az1web"   : "10.6.2.0/24",
+           "az2admin" : "10.6.10.0/24",
+           "az2data"  : "10.6.11.0/24",
+           "az2web"   : "10.6.12.0/24"
+      },
+      "sa-east-1" :  {
+           "VpcCidr" : "10.7.0.0/16",
+           "az1" : "sa-east-1a",
+           "az2" : "sa-east-1b",
+           "az1admin" : "10.7.0.0/24",
+           "az1data"  : "10.7.1.0/24",
+           "az1web"   : "10.7.2.0/24",
+           "az2admin" : "10.7.10.0/24",
+           "az2data"  : "10.7.11.0/24",
+           "az2web"   : "10.7.12.0/24"
+      },
+      "eu-central-1" :  {
+           "VpcCidr" : "10.8.0.0/16",
+           "az1" : "eu-central-1a",
+           "az2" : "eu-central-1b",
+           "az1admin" : "10.8.0.0/24",
+           "az1data"  : "10.8.1.0/24",
+           "az1web"   : "10.8.2.0/24",
+           "az2admin" : "10.8.10.0/24",
+           "az2data"  : "10.8.11.0/24",
+           "az2web"   : "10.8.12.0/24"
+      }
+    }
+  },
+
+  "Resources" : {
+
+    "VPC" : {
+      "Type" : "AWS::EC2::VPC",
+      "Properties" : {
+        "EnableDnsSupport" : "true",
+        "EnableDnsHostnames" : "true",
+        "CidrBlock" : { "Fn::FindInMap" : [ "VpcIpMap", { "Ref" : "Region"} , "VpcCidr" ]},
+        "Tags" : [
+          { "Key" : "Application", "Value" : { "Ref" : "AWS::StackName" } },
+          { "Key" : "Name", "Value" : "CF Experiment"  }
+        ]
+      }
+    },
+    "InternetGateway" : {
+      "Type" : "AWS::EC2::InternetGateway",
+      "Properties" : {
+        "Tags" : [
+          { "Key" : "Application", "Value" : { "Ref" : "AWS::StackName" } },
+          { "Key" : "Name", "Value" : "Main InternetGateway" },
+          { "Key" : "Network", "Value" : "Public" }
+        ]
+      }
+    },
+
+    "GatewayToInternet" : {
+       "Type" : "AWS::EC2::VPCGatewayAttachment",
+       "Properties" : {
+         "VpcId" : { "Ref" : "VPC" },
+         "InternetGatewayId" : { "Ref" : "InternetGateway" }
+       }
+    },
+    "SuperRouteTable" : {
+      "Type" : "AWS::EC2::RouteTable",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "Tags" : [
+          { "Key" : "Application", "Value" : { "Ref" : "AWS::StackName" } },
+          { "Key" : "Name", "Value" : "SuperRouteTable"  },
+          { "Key" : "Network", "Value" : "All" }
+        ]
+      }
+    },
+    "MainRoute" : {
+      "Type" : "AWS::EC2::Route",
+      "DependsOn" : "GatewayToInternet",
+      "Properties" : {
+        "RouteTableId" : { "Ref" : "SuperRouteTable" },
+        "DestinationCidrBlock" : "0.0.0.0/0",
+        "GatewayId" : { "Ref" : "InternetGateway" }
+      }
+    },
+
+    "AZ1AdminSubnet" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "CidrBlock" : { "Fn::FindInMap" : [ "VpcIpMap", { "Ref" : "Region"} , "az1admin" ]  },
+        "AvailabilityZone" : { "Fn::FindInMap" : ["VpcIpMap", { "Ref" : "Region"} , "az1" ] } ,
+        "Tags" : [
+          { "Key" : "Application", "Value" : { "Ref" : "AWS::StackName" } },
+          { "Key" : "Name", "Value" : "AZ1 Admin Subnet" }
+        ]
+      }
+    },
+    "AZ1AdminSubnetRouteTableAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "AZ1AdminSubnet" },
+        "RouteTableId" : { "Ref" : "SuperRouteTable" }
+      }
+    },
+
+    "AZ2AdminSubnet" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "VPC" },
+        "CidrBlock" : { "Fn::FindInMap" : [ "VpcIpMap", { "Ref" : "Region"} , "az2admin" ]  },
+        "AvailabilityZone" : { "Fn::FindInMap" : ["VpcIpMap", { "Ref" : "Region"} , "az2" ] } ,
+        "Tags" : [
+          { "Key" : "Application", "Value" : { "Ref" : "AWS::StackName" } },
+          { "Key" : "Name", "Value" : "AZ2 Admin Subnet" }
+        ]
+      }
+    },
+    "AZ2AdminSubnetRouteTableAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "AZ2AdminSubnet" },
+        "RouteTableId" : { "Ref" : "SuperRouteTable" }
+      }
+    },
+
+
+    "AdminEC2SecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "GroupDescription" : "Protecting the Administrative EC2 instances",
+        "VpcId" : { "Ref" : "VPC" },
+        "SecurityGroupIngress" :
+        [ 
+	  { "IpProtocol" : "tcp", "FromPort" : "22",  "ToPort" : "22",  "CidrIp" : { "Ref" : "SSHFrom" }}
+        ],
+        "Tags" : 
+        [ 
+	    { "Key" : "Name", "Value" : "Admin Security Group" }
+	]
+      }
+    },
+    
+    "AdminSGRule1": {
+      "Type" : "AWS::EC2::SecurityGroupIngress",
+      "Properties" : {
+	"IpProtocol" : "tcp",
+	"GroupId" :               { "Fn::GetAtt" : [ "AdminEC2SecurityGroup", "GroupId" ] } ,
+	"SourceSecurityGroupId" : { "Fn::GetAtt" : [ "AdminEC2SecurityGroup", "GroupId" ] },
+	"FromPort" : "0",
+	"ToPort" : "65535" }
+  },
+
+   "EIP1": {
+     "Type" : "AWS::EC2::EIP",
+     "Properties" : {
+       "Domain" : "vpc"
+     }
+   },
+
+  "SaltMasterLaunchConfig" : {
+   "Type" : "AWS::AutoScaling::LaunchConfiguration",
+   "Properties" : {
+      "KeyName" : { "Ref" : "KeyName" },
+      "AssociatePublicIpAddress" : "true",
+      "ImageId" : {
+         "Fn::FindInMap" : [
+            "AWSRegionArch2AMI",
+            { "Ref" : "AWS::Region" },
+            {
+               "Fn::FindInMap" : [
+                  "AWSInstanceType2Arch", { "Ref" : "InstanceType" }, "Arch"
+               ]
+            }
+         ]
+      },
+      "SecurityGroups" : [ { "Ref" : "AdminEC2SecurityGroup" } ],
+      "InstanceType" : { "Ref" : "InstanceType" },
+      "IamInstanceProfile" : {  "Ref":"InstanceProfile"},
+      "BlockDeviceMappings" : [
+         {
+           "DeviceName" : "/dev/sda1",
+           "Ebs" : { "VolumeSize" : "30", "VolumeType" : "io1", "Iops" : 200 } 
+         },
+         {
+           "DeviceName" : "/dev/sdm",
+           "Ebs" : { "VolumeSize" : "50", "DeleteOnTermination" : "true"}
+         }
+      ],
+      "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
+          "#!/bin/bash\n",
+          "apt-get update\n",
+          "apt-get upgrade -y\n",
+          "apt-get install -y python-setuptools python-pip\n",
+          "pip install --upgrade awscli\n",
+          "aws s3 cp s3://", {"Ref":"BucketName"}, "/aws_scripts/saltmaster_bootstrap.sh .\n",
+          "chmod +x saltmaster_bootstrap.sh\n",
+          "/bin/bash ./saltmaster_bootstrap.sh ", {"Ref":"Region"}, " ", { "Fn::GetAtt" : [ "EIP1", "AllocationId" ] }, "\n"
+        ]]}}
+   }
+ },
+
+  "SaltmasterGroup" : {
+    "Type" : "AWS::AutoScaling::AutoScalingGroup",
+    "Properties" : {
+      "AvailabilityZones" : ["us-west-2a", "us-west-2b"],
+      "LaunchConfigurationName" : { "Ref" : "SaltMasterLaunchConfig" },
+      "MinSize" : "1",
+      "MaxSize" : "1",
+      "Tags" : [ 
+                { "Key" : "CF Stack", "Value" : { "Ref" : "AWS::StackName" }, "PropagateAtLaunch":"true" }
+               ],
+      "VPCZoneIdentifier" : [
+         { "Ref" : "AZ1AdminSubnet"}, 
+         { "Ref" : "AZ2AdminSubnet"}
+       ]
+    }
+  }
+},
+  
+  "Outputs" : {
+  }
+}
