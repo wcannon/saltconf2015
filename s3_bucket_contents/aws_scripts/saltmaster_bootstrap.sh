@@ -34,12 +34,15 @@ aws s3 cp s3://saltconf2015bucket/masters_master_config /etc/salt/master
 ################################################################################
 ####### Need to git clone the repo locally so that a highstate can run #########
 ################################################################################
-# install ssh key from S3 bucket
-# git clone into local dir
+# git clone into local dir  /root/saltconf2015
+git clone https://github.com/wcannon/saltconf2015.git
+
 # create symlinks
-# /srv/salt
-# /srv/pillar
-# /srv/reactor
+#  pillar  reactor  README.md  s3_bucket_contents  salt
+#ln -s /home/wcannon/saltconf2015/saltconf2015/salt /tmp/salt
+ln -s /root/saltconf2015/pillar /srv/pillar
+ln -s /root/saltconf2015/reactor /srv/reactor
+ln -s /root/saltconf2015/salt /srv/salt
 
 # restart salt-master to pick up any master config file changes
 service salt-master restart
