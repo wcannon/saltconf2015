@@ -51,7 +51,7 @@
       "MaxLength": "128",
       "AllowedPattern" : "[-_ a-zA-Z0-9]*",
       "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores.",
-      "Default" : "saltconf2015"
+      "Default" : "saltconf2015bucket"
     }
 
   },
