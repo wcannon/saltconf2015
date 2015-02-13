@@ -41,6 +41,7 @@ git clone https://github.com/wcannon/saltconf2015.git  /root/saltconf2015
 ln -s /root/saltconf2015/pillar /srv/pillar
 ln -s /root/saltconf2015/reactor /srv/reactor
 ln -s /root/saltconf2015/salt /srv/salt
+ln -s /root/saltconf2015/runners /srv/salt/runners
 
 # restart salt-master to pick up any master config file changes
 service salt-master restart

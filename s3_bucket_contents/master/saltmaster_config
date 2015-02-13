@@ -650,3 +650,15 @@
 # List of git repositories to include with the local repo:
 #win_gitrepos:
 #  - 'https://github.com/saltstack/salt-winrepo.git'
+
+file_recv: True
+runner_dirs: ['/srv/salt/runners']
+
+file_roots:
+  base:
+    - /srv/salt
+
+pillar_roots:
+  base:
+    - /srv/pillar
+
