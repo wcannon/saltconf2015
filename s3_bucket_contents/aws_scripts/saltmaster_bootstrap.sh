@@ -47,6 +47,9 @@ ln -s /root/saltconf2015/salt /srv/salt
 # restart salt-master to pick up any master config file changes
 service salt-master restart
 
+## If master encryption key already in S3 bucket, replace local key with it and restart salt-master
+## If not, push the new master encryption key up to the S3 bucket
+
 # install salt-minion
 apt-get install -y salt-minion
 
