@@ -51,10 +51,15 @@ When lines occur (like below) the ec2 instance has associated itself with an ela
 
 
 TO DO Next:
-salt master key push up to s3 if not there
-salt master - pull down minion keys from s3
-salt reactor for saving minion keys to s3 on key acceptance
 
+** Work completely separately using another account
+1.  bucket name / folder / must be set in master bootstrap for sync'ing the master and minion keys
+
+2.  salt master key push up to s3 if not there
+    salt master - pull down minion keys from s3
+3.  salt reactor for saving minion keys to s3 on key acceptance
+4.  add cname auto update to cloudformation - to make it easy for minions to find saltmaster
+5.  remove password from user creation in s3_iam cloudformation template - pass it in as a ParameterKey
 
 
 
