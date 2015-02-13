@@ -1,8 +1,10 @@
 General Steps:
 
+
 -----------------
 Pre-Reqs:
 -----------------
+Tested only with ubuntu 14.04 LTS server (and client for laptop awscli)
 AWS root account
 Create ssh keypair in AWS ec2 consle, download and have accessible private Keyname
 Install awscli tools (e.g. pip install awscli)
@@ -38,6 +40,20 @@ Create vpc and etc. with autoscaling group
 ---------------------------------------------
 ** requires the output values of the saltconf_s3_iam stack creation (e.g. InstanceProfile)
 aws cloudformation create-stack --region us-west-2 --stack-name saltconf-vpc-singlemaster --template-body file:////home/wcannon/scratch/saltconf2015/cloudformation_templates/saltconf_vpc_singlemaster.json --parameters ParameterKey=KeyName,ParameterValue=autoscaling_test  ParameterKey=BucketName,ParameterValue=saltconf2015bucket ParameterKey=Region,ParameterValue=us-west-2 ParameterKey=SSHFrom,ParameterValue=50.137.210.143/32 ParameterKey=InstanceType,ParameterValue=m3.medium ParameterKey=InstanceProfile,ParameterValue=saltconf-s3-iam-S3SaltConf2015InstanceProfile-A1OO1PV80X44  
+
+While the instance spins up, and before it switches to using the elastic ip the bootstrap process can be watched:
+tail -f /var/log/cloud-init-output.log 
+
+When lines occur (like below) the ec2 instance has associated itself with an elastic ip address:
+{
+    "AssociationId": "eipassoc-1c506a79"
+}
+
+
+TO DO Next:
+salt master key push up to s3 if not there
+salt master - pull down minion keys from s3
+salt reactor for saving minion keys to s3 on key acceptance
 
 
 
