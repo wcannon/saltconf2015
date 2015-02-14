@@ -60,6 +60,8 @@ TO DO Next:
 3.  salt reactor for saving minion keys to s3 on key acceptance
 4.  add cname auto update to cloudformation - to make it easy for minions to find saltmaster
 5.  remove password from user creation in s3_iam cloudformation template - pass it in as a ParameterKey
+6.  run of highstate after accepting any key
+7.  easy way to assign grains to new servers
 
 
 
