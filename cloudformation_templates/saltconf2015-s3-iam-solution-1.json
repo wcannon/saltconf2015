@@ -53,6 +53,16 @@
                   "Version" : "2012-10-17",
                   "Statement": [ 
                     {
+                    "Effect":"Allow",
+                    "Action":["route53:ChangeResourceRecordSets"],
+                    "Resource":"arn:aws:route53:::hostedzone/Z2IBYTQ6W9V2HA"
+                    },
+                    {
+                    "Effect":"Allow",
+                    "Action":["route53:GetChange"],
+                    "Resource":"arn:aws:route53:::change/*"
+                    },
+                    {
                      "Effect": "Allow",
                      "Action": "s3:*",
                      "Resource": ["arn:aws:s3:::saltconf2015-solution-1",

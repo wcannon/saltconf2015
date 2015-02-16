@@ -72,5 +72,5 @@ Reference commands:
 # Create Stack
 aws cloudformation create-stack --region us-west-2 --stack-name saltconf_s3_iam --template-body file:////home/wcannon/hpulse-code/DevOps/cloudformation/s3_iam.json ParameterKey=BucketName,ParameterValue=saltconf2015 --capabilities CAPABILITY_IAM
 # Update stack
-aws cloudformation update-stack --region us-west-2 --stack-name saltconf_s3_iam --template-body file:////home/wcannon/hpulse-code/DevOps/cloudformation/s3_iam.json ParameterKey=BucketName,ParameterValue=saltconf2015 --capabilities CAPABILITY_IAM
+aws --profile william cloudformation update-stack --region us-east-1 --stack-name saltconf2015-s3-solution-1  --template-body file:////home/wcannon/saltconf2015/saltconf2015/cloudformation_templates/saltconf2015-s3-iam-solution-1.json --capabilities CAPABILITY_IAM
 
