@@ -73,6 +73,6 @@ lvm2:
     - installed
 
 # cmd.run --> so we can see the last time a highstate was run on a server
-date > /tmp/most_recent_salt_highstate_run.txt:
+date > /root/most_recent_salt_highstate_run.txt:
   cmd:
     - run
