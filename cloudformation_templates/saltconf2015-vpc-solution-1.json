@@ -365,9 +365,9 @@
       "MaxSize" : "1",
       "Tags" : [ 
                 { "Key" : "stack_name", "Value" : { "Ref" : "AWS::StackName" }, "PropagateAtLaunch":"true" },
-                { "Key" : "dns_name", "Value" : "salt1.devopslogic.com"},
-                { "Key" : "eip_id", "Value" : { "Fn::GetAtt" : [ "EIP1", "AllocationId" ] } },
-                { "Key" : "region", "Value" : { "Ref" : "Region" } }
+                { "Key" : "dns_name", "Value" : "salt1.devopslogic.com", "PropagateAtLaunch":"true" },
+                { "Key" : "eip_id", "Value" : { "Fn::GetAtt" : [ "EIP1", "AllocationId" ] }, "PropagateAtLaunch":"true"  },
+                { "Key" : "region", "Value" : { "Ref" : "Region" }, "PropagateAtLaunch":"true"  }
                ],
       "VPCZoneIdentifier" : [
          { "Ref" : "AZ1AdminSubnet"}, 
