@@ -29,7 +29,7 @@ apt-get install -y salt-doc
 apt-get install -y salt-master
 
 # download master config file
-aws s3 cp s3://saltconf2015bucket/master/saltmaster_config  /etc/salt/master
+aws s3 cp s3://saltconf2015-solution-1/master/saltmaster_config  /etc/salt/master
 
 ################################################################################
 ####### Need to git clone the repo locally so that a highstate can run #########
@@ -59,7 +59,7 @@ apt-get install -y salt-minion
 aws s3 cp s3://saltconf2015bucket/master/saltmaster_minion_config  /etc/salt/minion
 
 # download grains file - contains info about self (e.g. administration role)
-aws s3 cp s3://saltconf2015bucket/master/saltmaster-grains  /etc/salt/grains
+aws s3 cp s3://saltconf2015-solution-1/master/saltmaster-grains  /etc/salt/grains
 
 service salt-minion restart
 
