@@ -4,6 +4,8 @@
 region=$1
 # expecting to receive the elastic ip allocation info as param
 eip=$2
+# expecting the dns name for the server as well
+dnsname=$3
 
 # Associate this ec2 instance with an elastic ip address
 ## Need local instance id
