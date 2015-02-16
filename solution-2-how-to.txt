@@ -23,7 +23,8 @@ Set up "permanent" s3 bucket and iam profiles
 cd into saltconf2015/cloudformation_templates (from git clone subdir)
 
 ** Need to pass in path to template   e.g.  file:///  + full path to template
-aws cloudformation create-stack --stack-name saltconf-s3-iam --template-body file:////home/wcannon/scratch/saltconf2015/cloudformation_templates/saltconf_s3_iam.json --capabilities CAPABILITY_IAM
+aws --profile william cloudformation create-stack --region us-east-1 --stack-name saltconf2015-s3-solution-2  --template-body file:////home/wcannon/saltconf2015/saltconf2015/cloudformation_templates/saltconf2015-s3-iam-solution-2.json --capabilities CAPABILITY_IAM
+
 ** get output values of cloudformation stack (either in aws cloudformation console, or via aws cli tools)
 
 Set up aws credentials (either with the new user info created in from cloudformation template saltconf_s3_iam.json or another account with permissions)

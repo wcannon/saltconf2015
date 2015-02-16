@@ -35,12 +35,14 @@ aws configure
 cd into saltconf2015/ (parent directory)
 
 Put necessary scripts and resource dirs in new s3 bucket (example for my s3 bucket named saltconf2015bucket)
-aws s3 sync --recursive s3_bucket_contents/ s3://saltconf2015bucket
+aws --profile william s3 sync --recursive s3_bucket_contents_solution_1/ s3://saltconf2015-solution-1
+
 
 Create vpc and etc. with autoscaling group
 ---------------------------------------------
 ** requires the output values of the saltconf_s3_iam stack creation (e.g. InstanceProfile)
-aws cloudformation create-stack --region us-west-2 --stack-name saltconf-vpc-singlemaster --template-body file:////home/wcannon/scratch/saltconf2015/cloudformation_templates/saltconf_vpc_singlemaster.json --parameters ParameterKey=KeyName,ParameterValue=autoscaling_test  ParameterKey=BucketName,ParameterValue=saltconf2015bucket ParameterKey=Region,ParameterValue=us-west-2 ParameterKey=SSHFrom,ParameterValue=50.137.210.143/32 ParameterKey=InstanceType,ParameterValue=m3.medium ParameterKey=InstanceProfile,ParameterValue=saltconf-s3-iam-S3SaltConf2015InstanceProfile-A1OO1PV80X44  
+
+aws --profile william cloudformation create-stack --region us-east-1 --stack-name saltconf2015-vpc-solution-1 --template-body file:////home/wcannon/saltconf2015/saltconf2015/cloudformation_templates/saltconf2015-vpc-solution-1.json --parameters ParameterKey=KeyName,ParameterValue=saltconf2015  ParameterKey=BucketName,ParameterValue=saltconf2015-solution-1 ParameterKey=Region,ParameterValue=us-east-1 ParameterKey=SSHFrom,ParameterValue=50.137.210.143/32 ParameterKey=InstanceType,ParameterValue=t2.small ParameterKey=InstanceProfile,ParameterValue=saltconf2015-s3-solution-1-S3SaltConf2015InstanceProfile-CHTJB4OGHLJD
 
 While the instance spins up, and before it switches to using the elastic ip the bootstrap process can be watched:
 tail -f /var/log/cloud-init-output.log 

@@ -18,7 +18,7 @@
        "Description" : "Name of an AWS region",
        "Type": "String",
        "AllowedValues" : [ "us-east-1", "us-west-1", "us-west-2", "eu-west-1", "ap-southeast-1", "ap-southeast-2", "ap-northeast-1", "sa-east-1", "eu-central-1"],
-       "Default" : "us-west-2"
+       "Default" : "us-east-1"
     },
 
     "SSHFrom" : {
@@ -34,24 +34,24 @@
     "InstanceType" : {
       "Description" : "Size of an instance",
       "Type" : "String",
-      "AllowedValues" : [ "m3.medium", "m3.large", "m3.xlarge"],
-      "Default" : "m3.medium"
+      "AllowedValues" : [ "t2.small", "m3.medium", "m3.large", "m3.xlarge"],
+      "Default" : "t2.small"
     },
 
     "InstanceProfile" : {
       "Description" : "The IAM instance profile to use for access to an S3 bucket",
       "Type" : "String",
-      "Default" : "saltconf2015demo1-S3SaltConf2015InstanceProfile-9BN5ZWWI331N"
+      "Default" : "saltconf2015-s3-solution-1-S3SaltConf2015InstanceProfile-CHTJB4OGHLJD"
     },
 
     "BucketName" : {
-      "Description" : "Name of a new s3 bucket to create",
+      "Description" : "Name of the s3 bucket that our vpc will use - bootstrap, data",
       "Type" : "String",
       "MinLength": "1",
       "MaxLength": "128",
       "AllowedPattern" : "[-_ a-zA-Z0-9]*",
       "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores.",
-      "Default" : "saltconf2015bucket"
+      "Default" : "saltconf2015-solution-1"
     }
 
   },
@@ -60,6 +60,7 @@
 
     "AWSInstanceType2Arch" : {
       "t1.micro"    : { "Arch" : "64" },
+      "t2.small"    : { "Arch" : "64" },
       "m1.small"    : { "Arch" : "64" },
       "m1.medium"   : { "Arch" : "64" },
       "m1.large"    : { "Arch" : "64" },
@@ -78,7 +79,7 @@
     },
 
     "AWSRegionArch2AMI" : {
-      "us-east-1"      : { "32" : "ami-a0cd60c9", "64" : "ami-aecd60c7", "64Cluster" : "ami-a8cd60c1",      "64GPU" : "ami-eccf6285" },
+      "us-east-1"      : { "32" : "ami-a0cd60c9", "64" : "ami-9a562df2", "64Cluster" : "ami-a8cd60c1",      "64GPU" : "ami-eccf6285" },
       "us-west-2"      : { "32" : "ami-46da5576", "64" : "ami-29ebb519", "64Cluster" : "NOT_YET_SUPPORTED", "64GPU" : "NOT_YET_SUPPORTED" },
       "us-west-1"      : { "32" : "ami-7d4c6938", "64" : "ami-734c6936", "64Cluster" : "NOT_YET_SUPPORTED", "64GPU" : "NOT_YET_SUPPORTED" },
       "eu-west-1"      : { "32" : "ami-61555115", "64" : "ami-6d555119", "64Cluster" : "ami-67555113",      "64GPU" : "NOT_YET_SUPPORTED" },
@@ -339,11 +340,7 @@
       "BlockDeviceMappings" : [
          {
            "DeviceName" : "/dev/sda1",
-           "Ebs" : { "VolumeSize" : "30", "VolumeType" : "io1", "Iops" : 200 } 
-         },
-         {
-           "DeviceName" : "/dev/sdm",
-           "Ebs" : { "VolumeSize" : "50", "DeleteOnTermination" : "true"}
+           "Ebs" : { "VolumeSize" : "15", "VolumeType" : "io1", "Iops" : 200 } 
          }
       ],
       "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
@@ -362,12 +359,15 @@
   "SaltmasterGroup" : {
     "Type" : "AWS::AutoScaling::AutoScalingGroup",
     "Properties" : {
-      "AvailabilityZones" : ["us-west-2a", "us-west-2b"],
+      "AvailabilityZones" : ["us-east-1a", "us-east-1c"],
       "LaunchConfigurationName" : { "Ref" : "SaltMasterLaunchConfig" },
       "MinSize" : "1",
       "MaxSize" : "1",
       "Tags" : [ 
-                { "Key" : "CF Stack", "Value" : { "Ref" : "AWS::StackName" }, "PropagateAtLaunch":"true" }
+                { "Key" : "stack_name", "Value" : { "Ref" : "AWS::StackName" }, "PropagateAtLaunch":"true" },
+                { "Key" : "dns_name", "Value" : "salt1.devopslogic.com"},
+                { "Key" : "eip_id", "Value" : { "Fn::GetAtt" : [ "EIP1", "AllocationId" ] } },
+                { "Key" : "region", "Value" : { "Ref" : "Region" } }
                ],
       "VPCZoneIdentifier" : [
          { "Ref" : "AZ1AdminSubnet"}, 
