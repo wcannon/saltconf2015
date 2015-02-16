@@ -12,7 +12,7 @@
       "MaxLength": "128",
       "AllowedPattern" : "[-_ a-zA-Z0-9]*",
       "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores.",
-      "Default" : "saltconf2015"
+      "Default" : "saltconf2015-solution-2"
     }
 
   },
@@ -55,8 +55,8 @@
                     {
                      "Effect": "Allow",
                      "Action": "s3:*",
-                     "Resource": ["arn:aws:s3:::saltconf2015bucket",
-                                  "arn:aws:s3:::saltconf2015bucket/*"]
+                     "Resource": ["arn:aws:s3:::saltconf2015-solution-2",
+                                  "arn:aws:s3:::saltconf2015-solution-2/*"]
                     },
                     {"Effect": "Allow",
                      "Action": "s3:ListAllMyBuckets",
@@ -96,7 +96,7 @@
           {
             "Effect": "Allow",
             "Action": [ "s3:*" ],
-            "Resource": ["arn:aws:s3:::saltconf2015bucket", "arn:aws:s3:::saltconf2015bucket/*"]
+            "Resource": ["arn:aws:s3:::saltconf2015-solution-2", "arn:aws:s3:::saltconf2015-solution-2/*"]
           },
           {"Effect": "Allow",
             "Action": [ "s3:ListAllMyBuckets" ],
@@ -111,25 +111,7 @@
     "Properties": {
       "Path": "/"
     }
-  },
-
-  "saltconf2015user" : {
-   "Type" : "AWS::IAM::User",
-   "Properties" : {
-      "Path" : "/",
-      "Groups" : [ {"Ref": "SaltConf2015Group"} ],
-      "LoginProfile" : {
-         "Password" : "s3cr3tpassword"
-      }
-    }
-  },
-
-  "saltconf2015accesskey" : {
-    "Type" : "AWS::IAM::AccessKey",
-    "Properties" : {
-      "UserName" : { "Ref" : "saltconf2015user" }
-   }
-  } 
+  }
 
 },
   
@@ -138,7 +120,7 @@
       "Value" : { "Fn::Join" : [
          "", [ "https://", { "Fn::GetAtt" : [ "SaltConf2015Bucket", "DomainName" ] } ]
       ] },
-      "Description" : "Name of S3 bucket for saltconf 2015 demo"
+      "Description" : "Name of S3 bucket for saltconf 2015 solution 1"
    },
    "S3SaltConf2015Role" : {
       "Value" : { "Ref": "S3SaltConf2015Role"},
@@ -155,19 +137,7 @@
    "S3SaltConf2015InstanceArn" : {
       "Value" :  {"Fn::GetAtt" : ["S3SaltConf2015InstanceProfile", "Arn"] },
       "Description" : "AWS ARN of S3SaltConf2015InstanceProfile"
-   },
-   "SaltConf2015User" : {
-      "Value" :  { "Ref" : "saltconf2015user"},
-      "Description" : "User account for manipulating bucket"
-   },
-   "AccessKeyforsaltconf2015user" : {
-      "Value" : { "Ref" : "saltconf2015accesskey" }
-   },
-   "SecretKeyforsaltconf2015useraccesskey" : {
-      "Value" : {
-      "Fn::GetAtt" : [ "saltconf2015accesskey", "SecretAccessKey" ]
    }
 } 
- }
 
 }
