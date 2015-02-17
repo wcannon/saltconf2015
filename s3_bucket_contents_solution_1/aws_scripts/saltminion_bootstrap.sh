@@ -9,10 +9,10 @@ apt-get install -y salt-minion
 
 # download minion config file -- contains a 'master: 127.0.0.1 record' and other
 # necessary info e.g. file_roots, custom modules and etc
-aws s3 cp s3://saltconf2015-solution-1/minion_config /etc/salt/minion
+aws s3 cp s3://saltconf2015-solution-1/minion/minion_config /etc/salt/minion
 
 # download grains file - contains info about self (e.g. administration role)
-aws s3 cp s3://saltconf2015-solution-1/webserver-grains /etc/salt/grains
+aws s3 cp s3://saltconf2015-solution-1/minion/webserver-grains /etc/salt/grains
 
 service salt-minion restart
 
