@@ -663,3 +663,7 @@ pillar_roots:
   base:
     - /srv/pillar
 
+reactor:
+  - 'salt/minion/*/start': 
+    - /srv/reactor/conditional_highstate.sls 
+
