@@ -401,6 +401,7 @@
           "pip install --upgrade awscli\n",
           "aws s3 cp s3://", {"Ref":"BucketName"}, "/aws_scripts/saltminion_bootstrap.sh .\n",
           "chmod +x saltminion_bootstrap.sh\n",
+          "/bin/bash ./saltminion_bootstrap.sh\n"
         ]]}}
    }
  },
