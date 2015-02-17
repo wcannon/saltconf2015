@@ -42,7 +42,7 @@ Create vpc and etc. with autoscaling group
 ---------------------------------------------
 ** requires the output values of the saltconf_s3_iam stack creation (e.g. InstanceProfile)
 
-aws --profile william cloudformation create-stack --region us-east-1 --stack-name saltconf2015-vpc-solution-1 --template-body file:////home/wcannon/saltconf2015/saltconf2015/cloudformation_templates/saltconf2015-vpc-solution-1.json --parameters ParameterKey=KeyName,ParameterValue=saltconf2015  ParameterKey=BucketName,ParameterValue=saltconf2015-solution-1 ParameterKey=Region,ParameterValue=us-east-1 ParameterKey=SSHFrom,ParameterValue=50.137.210.143/32 ParameterKey=InstanceType,ParameterValue=t2.small ParameterKey=InstanceProfile,ParameterValue=saltconf2015-s3-solution-1-S3SaltConf2015InstanceProfile-CHTJB4OGHLJD
+aws --profile william cloudformation create-stack --region us-east-1 --stack-name saltconf2015-vpc-solution-1 --template-body file:////home/wcannon/saltconf2015/saltconf2015/cloudformation_templates/saltconf2015-vpc-solution-1.json --parameters ParameterKey=KeyName,ParameterValue=saltconf2015  ParameterKey=BucketName,ParameterValue=saltconf2015-solution-1 ParameterKey=Region,ParameterValue=us-east-1 ParameterKey=SSHFrom,ParameterValue=75.168.148.128/32 ParameterKey=InstanceType,ParameterValue=t2.small ParameterKey=InstanceProfile,ParameterValue=saltconf2015-s3-solution-1-S3SaltConf2015InstanceProfile-CHTJB4OGHLJD
 
 While the instance spins up, and before it switches to using the elastic ip the bootstrap process can be watched:
 tail -f /var/log/cloud-init-output.log 
@@ -69,10 +69,17 @@ TO DO Next:
 
 
 Reference commands:
-# Create Stack
-aws cloudformation create-stack --region us-west-2 --stack-name saltconf_s3_iam --template-body file:////home/wcannon/hpulse-code/DevOps/cloudformation/s3_iam.json ParameterKey=BucketName,ParameterValue=saltconf2015 --capabilities CAPABILITY_IAM
-# Update stack
+# Create Stack Examples
+aws --profile william cloudformation create-stack --region us-east-1 --stack-name saltconf2015-s3-solution-1  --template-body file:////home/wcannon/saltconf2015/saltconf2015/cloudformation_templates/saltconf2015-s3-iam-solution-1.json --capabilities CAPABILITY_IAM
+
+# Update Stack Examples
 aws --profile william cloudformation update-stack --region us-east-1 --stack-name saltconf2015-s3-solution-1  --template-body file:////home/wcannon/saltconf2015/saltconf2015/cloudformation_templates/saltconf2015-s3-iam-solution-1.json --capabilities CAPABILITY_IAM
+
+ip at office
+50.137.210.143
+
+ip at home
+75.168.148.128
 
 
 https://wiki.outscale.net/display/DOCU/VPC-FAQ

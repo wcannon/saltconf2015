@@ -13,8 +13,14 @@ instanceid=`curl -s http://169.254.169.254/latest/meta-data/instance-id`
 #echo $instanceid
 
 ## Need eip allocation id
-aws ec2 associate-address  --region $region --allow-reassociation  --instance-id $instanceid  --allocation-id $eip
+#aws ec2 associate-address  --region $region --allow-reassociation  --instance-id $instanceid  --allocation-id $eip
 # e.g. aws --region us-west-2 ec2 associate-address  --allow-reassociation   --instance-id i-5731105b  --allocation-id eipalloc-2fcf1b4a
+
+## Update our template rrset dns batch change file
+# sed  's/new-dns-name/sol1-salt1.devopslogic.com/' rrset_template.json | sed 's/target-dns-name/ec2.1234awsdns.com/' > rrset2.json
+
+# Create / Update record for sol1-salt1.devopslogic.com
+##aws --region us-east-1 route53 change-resource-record-sets --hosted-zone-id Z2IBYTQ6W9V2HA --change-batch file:///root/rrset2.json
 
 # set up ppa for saltstack
 add-apt-repository -y ppa:saltstack/salt
