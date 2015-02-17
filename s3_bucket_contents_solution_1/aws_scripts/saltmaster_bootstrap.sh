@@ -39,13 +39,28 @@ apt-get install -y salt-doc
 # install salt-master
 apt-get install -y salt-master
 
+# Check to see if our saltmaster.pem file exists by doing a simple ls on the expected location
+info=`aws s3 ls s3://saltconf2015-solution-1/master/master.pem 2>/dev/null`
+
+if [ $? -eq 0 ]
+then
+  ## if the key exists, download it and restart salt-master service
+  #echo $?
+  #echo "found key in s3, downloading and restarting salt-master"
+  aws s3 cp s3://saltconf2015-solution-1/master/master.pem /etc/salt/pki/master/master.pem
+  service salt-master restart 
+else 
+  ## key does not exist, upload our key as we are the first salt-master
+  #echo $?
+  #echo "key not found in s3, uploading master key to s3"
+  aws s3 cp /etc/salt/pki/master/master.pem s3://saltconf2015-solution-1/master/master.pem
+fi
+
+
 # download master config file
 aws s3 cp s3://saltconf2015-solution-1/master/saltmaster_config  /etc/salt/master
 
-################################################################################
-####### Need to git clone the repo locally so that a highstate can run #########
-################################################################################
-# git clone into local dir  /root/saltconf2015
+# Need to git clone the repo locally so that a highstate can run on the salt-master
 git clone https://github.com/wcannon/saltconf2015.git  /root/saltconf2015
 
 # create symlinks
@@ -57,16 +72,11 @@ ln -s /root/saltconf2015/runners /srv/salt/runners
 # restart salt-master to pick up any master config file changes
 service salt-master restart
 
-###################################################################
-## If master encryption key already in S3 bucket, replace local key with it and restart salt-master
-## If not, push the new master encryption key up to the S3 bucket
-###################################################################
-
 # install salt-minion
 apt-get install -y salt-minion
 
 # download minion config file -- contains a 'master: 127.0.0.1 record' and other
-# necessary info e.g. file_roots, custom modules and etc
+# necessary info
 aws s3 cp s3://saltconf2015-solution-1/master/saltmaster_minion_config  /etc/salt/minion
 
 # download grains file - contains info about self (e.g. administration role)
