@@ -2,25 +2,28 @@
 
 # expecting region as param 1
 region=$1
-# expecting to receive the elastic ip allocation info as param
-eip=$2
 # expecting the dns name for the server as well
-dnsname=$3
+dnsname=$2
 
 # Associate this ec2 instance with an elastic ip address
 ## Need local instance id
-instanceid=`curl -s http://169.254.169.254/latest/meta-data/instance-id`
+#instanceid=`curl -s http://169.254.169.254/latest/meta-data/instance-id`
 #echo $instanceid
 
 ## Need eip allocation id
 #aws ec2 associate-address  --region $region --allow-reassociation  --instance-id $instanceid  --allocation-id $eip
 # e.g. aws --region us-west-2 ec2 associate-address  --allow-reassociation   --instance-id i-5731105b  --allocation-id eipalloc-2fcf1b4a
 
+instancedns=`curl -s http://169.254.169.254/latest/meta-data/public-hostname`
+
 ## Update our template rrset dns batch change file
-# sed  's/new-dns-name/sol1-salt1.devopslogic.com/' rrset_template.json | sed 's/target-dns-name/ec2.1234awsdns.com/' > rrset2.json
+aws s3 cp s3://saltconf2015-solution-1/master/rrset_template.json /tmp
+#sed  "s/new-dns-name/sol1-salt1.devopslogic.com/" rrset_template.json | sed "s/target-dns-name/ec2.1234awsdns.com/" > rrset2.json
+sed  "s/new-dns-name/$dnsname/" /tmp/rrset_template.json | sed "s/target-dns-name/$instancedns/" > /tmp/rrset2.json
 
 # Create / Update record for sol1-salt1.devopslogic.com
-##aws --region us-east-1 route53 change-resource-record-sets --hosted-zone-id Z2IBYTQ6W9V2HA --change-batch file:///root/rrset2.json
+#aws --region us-east-1 route53 change-resource-record-sets --hosted-zone-id Z2IBYTQ6W9V2HA --change-batch file:///root/rrset2.json
+aws --region us-east-1 route53 change-resource-record-sets --hosted-zone-id Z2IBYTQ6W9V2HA --change-batch file:///tmp/rrset2.json
 
 # set up ppa for saltstack
 add-apt-repository -y ppa:saltstack/salt

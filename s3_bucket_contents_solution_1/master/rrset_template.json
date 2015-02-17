@@ -1,0 +1,19 @@
+{
+  "Comment": "Create or Update a dns cname record for a salt-master",
+  "Changes": [
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "new-dns-name",
+        "Type": "CNAME",
+        "TTL": 60,
+        "ResourceRecords": [
+          {
+            "Value": "target-dns-name"
+          }
+        ]
+      }
+    }
+  ]
+}
+

@@ -311,13 +311,6 @@
 	"ToPort" : "65535" }
   },
 
-   "EIP1": {
-     "Type" : "AWS::EC2::EIP",
-     "Properties" : {
-       "Domain" : "vpc"
-     }
-   },
-
   "SaltMasterLaunchConfig" : {
    "Type" : "AWS::AutoScaling::LaunchConfiguration",
    "Properties" : {
@@ -351,7 +344,7 @@
           "pip install --upgrade awscli\n",
           "aws s3 cp s3://", {"Ref":"BucketName"}, "/aws_scripts/saltmaster_bootstrap.sh .\n",
           "chmod +x saltmaster_bootstrap.sh\n",
-          "/bin/bash ./saltmaster_bootstrap.sh ", {"Ref":"Region"}, " ", { "Fn::GetAtt" : [ "EIP1", "AllocationId" ] }, "\n"
+          "/bin/bash ./saltmaster_bootstrap.sh ", {"Ref":"Region"}, " ", "sol1-salt1.devopslogic.com\n"
         ]]}}
    }
  },
@@ -365,8 +358,7 @@
       "MaxSize" : "1",
       "Tags" : [ 
                 { "Key" : "stack_name", "Value" : { "Ref" : "AWS::StackName" }, "PropagateAtLaunch":"true" },
-                { "Key" : "dns_name", "Value" : "salt1.devopslogic.com", "PropagateAtLaunch":"true" },
-                { "Key" : "eip_id", "Value" : { "Fn::GetAtt" : [ "EIP1", "AllocationId" ] }, "PropagateAtLaunch":"true"  },
+                { "Key" : "dns_name", "Value" : "sol1-salt1.devopslogic.com", "PropagateAtLaunch":"true" },
                 { "Key" : "region", "Value" : { "Ref" : "Region" }, "PropagateAtLaunch":"true"  }
                ],
       "VPCZoneIdentifier" : [

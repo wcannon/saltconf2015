@@ -54,21 +54,11 @@ python-pip:
   pkg:
     - installed
 
-# raid software
-mdadm:
-  pkg:
-    - installed
-
 # xfs filesystem software
 xfsprogs:
   pkg:
     - installed
 xfsdump:
-  pkg:
-    - installed
-
-# lvm software
-lvm2:
   pkg:
     - installed
 
