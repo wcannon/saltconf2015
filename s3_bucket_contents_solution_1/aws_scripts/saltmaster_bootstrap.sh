@@ -47,13 +47,16 @@ then
   ## if the key exists, download it and restart salt-master service
   #echo $?
   #echo "found key in s3, downloading and restarting salt-master"
+  service salt-master stop
   aws s3 cp s3://saltconf2015-solution-1/master/master.pem /etc/salt/pki/master/master.pem
-  service salt-master restart 
+  aws s3 cp s3://saltconf2015-solution-1/master/master.pub /etc/salt/pki/master/master.pub
+  service salt-master start 
 else 
   ## key does not exist, upload our key as we are the first salt-master
   #echo $?
   #echo "key not found in s3, uploading master key to s3"
   aws s3 cp /etc/salt/pki/master/master.pem s3://saltconf2015-solution-1/master/master.pem
+  aws s3 cp /etc/salt/pki/master/master.pub s3://saltconf2015-solution-1/master/master.pub
 fi
 
 
