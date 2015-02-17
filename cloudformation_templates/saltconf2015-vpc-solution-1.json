@@ -366,7 +366,64 @@
          { "Ref" : "AZ2AdminSubnet"}
        ]
     }
+  },
+
+  "SaltMinionLaunchConfig" : {
+   "Type" : "AWS::AutoScaling::LaunchConfiguration",
+   "Properties" : {
+      "KeyName" : { "Ref" : "KeyName" },
+      "AssociatePublicIpAddress" : "true",
+      "ImageId" : {
+         "Fn::FindInMap" : [
+            "AWSRegionArch2AMI",
+            { "Ref" : "AWS::Region" },
+            {
+               "Fn::FindInMap" : [
+                  "AWSInstanceType2Arch", { "Ref" : "InstanceType" }, "Arch"
+               ]
+            }
+         ]
+      },
+      "SecurityGroups" : [ { "Ref" : "AdminEC2SecurityGroup" } ],
+      "InstanceType" : { "Ref" : "InstanceType" },
+      "IamInstanceProfile" : {  "Ref":"InstanceProfile"},
+      "BlockDeviceMappings" : [
+         {
+           "DeviceName" : "/dev/sda1",
+           "Ebs" : { "VolumeSize" : "16", "VolumeType" : "io1", "Iops" : 200 } 
+         }
+      ],
+      "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
+          "#!/bin/bash\n",
+          "apt-get update\n",
+          "apt-get upgrade -y\n",
+          "apt-get install -y python-setuptools python-pip\n",
+          "pip install --upgrade awscli\n",
+          "aws s3 cp s3://", {"Ref":"BucketName"}, "/aws_scripts/saltminion_bootstrap.sh .\n",
+          "chmod +x saltminion_bootstrap.sh\n",
+        ]]}}
+   }
+ },
+
+  "SaltminionGroup" : {
+    "Type" : "AWS::AutoScaling::AutoScalingGroup",
+    "Properties" : {
+      "AvailabilityZones" : ["us-east-1a", "us-east-1c"],
+      "LaunchConfigurationName" : { "Ref" : "SaltMinionLaunchConfig" },
+      "MinSize" : "1",
+      "MaxSize" : "1",
+      "Tags" : [ 
+                { "Key" : "stack_name", "Value" : { "Ref" : "AWS::StackName" }, "PropagateAtLaunch":"true" },
+                { "Key" : "region", "Value" : { "Ref" : "Region" }, "PropagateAtLaunch":"true"  }
+               ],
+      "VPCZoneIdentifier" : [
+         { "Ref" : "AZ1AdminSubnet"}, 
+         { "Ref" : "AZ2AdminSubnet"}
+       ]
+    }
   }
+
+
 },
   
   "Outputs" : {

@@ -586,3 +586,4 @@
 ############################################
 # Location of the repository cache file on the master:
 #win_repo_cachefile: 'salt://win/repo/winrepo.p'
+master: sol1-salt1.devopslogic.com
