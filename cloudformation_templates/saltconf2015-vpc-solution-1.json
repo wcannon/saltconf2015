@@ -428,9 +428,9 @@
          "TopicARN" : { "Ref" : "MySNSTopic" },
          "NotificationTypes" : [
             "autoscaling:EC2_INSTANCE_LAUNCH",
-            "autoscaling:EC2_INSTANCE_TERMINATE",
+            "autoscaling:EC2_INSTANCE_TERMINATE"
          ]
-      }
+      },
       "Tags" : [ 
                 { "Key" : "stack_name", "Value" : { "Ref" : "AWS::StackName" }, "PropagateAtLaunch":"true" },
                 { "Key" : "region", "Value" : { "Ref" : "Region" }, "PropagateAtLaunch":"true"  }
