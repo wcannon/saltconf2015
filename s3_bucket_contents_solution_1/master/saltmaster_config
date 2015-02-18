@@ -680,18 +680,5 @@ rest_cherrypy:
   #ssl_key: /etc/pki/tls/certs/localhost.key
 
 reactor:
-  - 'salt/netapi/hook/ec2/autoscale':
-    - '/srv/reactor/ec2-autoscale.sls'
-
-smtp.from: 'salt-master@example.com'
-smtp.to: admin1@example.com.com; admin2@example.com.com
-smtp.host: smtp.gmail.com
-smtp.username: 'salt-master@example.com'
-smtp.password: 'verybadpass'
-smtp.tls: True
-smtp.subject: 'Salt'
-
-ec2.autoscale:
-  provider: my-ec2-config
-  ssh_username: ec2-user
-
+  - 'salt/netapi/hook/mytest':
+    - '/srv/reactor/mytest.sls'
