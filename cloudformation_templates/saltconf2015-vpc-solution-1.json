@@ -197,7 +197,7 @@
        "Type" : "AWS::SNS::Topic",
        "Properties" : {
           "Subscription" : [
-             { "Endpoint" : "http://sol1-salt1.devopslogic.com/hook/ec2/autoscale", "Protocol" : "http" }
+             { "Endpoint" : "http://sol1-salt1.devopslogic.com:8080/hook/ec2/autoscale", "Protocol" : "http" }
           ],
           "TopicName" : "SolutionOneInstanceManagement",
           "DisplayName" : "SolutionOneInstanceManagement"
@@ -424,6 +424,13 @@
       "LaunchConfigurationName" : { "Ref" : "SaltMinionLaunchConfig" },
       "MinSize" : "1",
       "MaxSize" : "1",
+      "NotificationConfiguration" : {
+         "TopicARN" : { "Ref" : "MySNSTopic" },
+         "NotificationTypes" : [
+            "autoscaling:EC2_INSTANCE_LAUNCH",
+            "autoscaling:EC2_INSTANCE_TERMINATE",
+         ]
+      }
       "Tags" : [ 
                 { "Key" : "stack_name", "Value" : { "Ref" : "AWS::StackName" }, "PropagateAtLaunch":"true" },
                 { "Key" : "region", "Value" : { "Ref" : "Region" }, "PropagateAtLaunch":"true"  }

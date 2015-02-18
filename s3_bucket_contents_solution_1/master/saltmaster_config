@@ -178,7 +178,7 @@
 # Enable auto_accept, this setting will automatically accept all incoming
 # public keys from the minions. Note that this is insecure.
 #auto_accept: False
-auto_accept: True
+#auto_accept: True
 
 # Time in minutes that a incomming public key with a matching name found in
 # pki_dir/minion_autosign/keyid is automatically accepted. Expired autosign keys
@@ -663,7 +663,35 @@ pillar_roots:
   base:
     - /srv/pillar
 
+external_auth:
+  pam:
+    myuser:
+      - .*
+      - '@runner'
+      - '@wheel'
+
+rest_cherrypy:
+  port: 8080
+  host: 0.0.0.0
+  webhook_url: /hook
+  webhook_disable_auth: True
+  disable_ssl: True
+  #ssl_crt: /etc/pki/tls/certs/localhost.crt
+  #ssl_key: /etc/pki/tls/certs/localhost.key
+
 reactor:
-  - 'salt/minion/*/start': 
-    - /srv/reactor/conditional_highstate.sls 
+  - 'salt/netapi/hook/ec2/autoscale':
+    - '/srv/reactor/ec2-autoscale.sls'
+
+smtp.from: 'salt-master@example.com'
+smtp.to: admin1@example.com.com; admin2@example.com.com
+smtp.host: smtp.gmail.com
+smtp.username: 'salt-master@example.com'
+smtp.password: 'verybadpass'
+smtp.tls: True
+smtp.subject: 'Salt'
+
+ec2.autoscale:
+  provider: my-ec2-config
+  ssh_username: ec2-user
 
