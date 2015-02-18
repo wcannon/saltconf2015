@@ -69,11 +69,27 @@ TO DO Next:
 
 
 Reference commands:
+---------------------------
 # Create Stack Examples
 aws --profile william cloudformation create-stack --region us-east-1 --stack-name saltconf2015-s3-solution-1  --template-body file:////home/wcannon/saltconf2015/saltconf2015/cloudformation_templates/saltconf2015-s3-iam-solution-1.json --capabilities CAPABILITY_IAM
 
+aws --profile william cloudformation create-stack --region us-east-1 --stack-name saltconf2015-vpc-solution-1 --template-body file:////home/wcannon/saltconf2015/saltconf2015/cloudformation_templates/saltconf2015-vpc-solution-1.json --parameters ParameterKey=KeyName,ParameterValue=saltconf2015  ParameterKey=BucketName,ParameterValue=saltconf2015-solution-1 ParameterKey=Region,ParameterValue=us-east-1 ParameterKey=SSHFrom,ParameterValue=75.168.148.128/32 ParameterKey=InstanceType,ParameterValue=t2.small ParameterKey=InstanceProfile,ParameterValue=saltconf2015-s3-solution-1-S3SaltConf2015InstanceProfile-CHTJB4OGHLJD
+
+aws --profile william cloudformation create-stack --region us-east-1 --stack-name saltconf2015-vpc-solution-1 --template-body file:////home/wcannon/saltconf2015/saltconf2015/cloudformation_templates/saltconf2015-vpc-solution-1.json --parameters ParameterKey=KeyName,ParameterValue=saltconf2015  ParameterKey=BucketName,ParameterValue=saltconf2015-solution-1 ParameterKey=Region,ParameterValue=us-east-1 ParameterKey=SSHFrom,ParameterValue=50.137.210.143/32 ParameterKey=InstanceType,ParameterValue=t2.small ParameterKey=InstanceProfile,ParameterValue=saltconf2015-s3-solution-1-S3SaltConf2015InstanceProfile-CHTJB4OGHLJD
+
+
 # Update Stack Examples
+---------------------------
 aws --profile william cloudformation update-stack --region us-east-1 --stack-name saltconf2015-s3-solution-1  --template-body file:////home/wcannon/saltconf2015/saltconf2015/cloudformation_templates/saltconf2015-s3-iam-solution-1.json --capabilities CAPABILITY_IAM
+
+aws --profile william cloudformation update-stack --region us-east-1 --stack-name saltconf2015-vpc-solution-1 --template-body file:////home/wcannon/saltconf2015/saltconf2015/cloudformation_templates/saltconf2015-vpc-solution-1.json --parameters ParameterKey=KeyName,ParameterValue=saltconf2015  ParameterKey=BucketName,ParameterValue=saltconf2015-solution-1 ParameterKey=Region,ParameterValue=us-east-1 ParameterKey=SSHFrom,ParameterValue=75.168.148.128/32 ParameterKey=InstanceType,ParameterValue=t2.small ParameterKey=InstanceProfile,ParameterValue=saltconf2015-s3-solution-1-S3SaltConf2015InstanceProfile-CHTJB4OGHLJD
+
+aws --profile william cloudformation update-stack --region us-east-1 --stack-name saltconf2015-vpc-solution-1 --template-body file:////home/wcannon/saltconf2015/saltconf2015/cloudformation_templates/saltconf2015-vpc-solution-1.json --parameters ParameterKey=KeyName,ParameterValue=saltconf2015  ParameterKey=BucketName,ParameterValue=saltconf2015-solution-1 ParameterKey=Region,ParameterValue=us-east-1 ParameterKey=SSHFrom,ParameterValue=50.137.210.143/32 ParameterKey=InstanceType,ParameterValue=t2.small ParameterKey=InstanceProfile,ParameterValue=saltconf2015-s3-solution-1-S3SaltConf2015InstanceProfile-CHTJB4OGHLJD
+
+# Update bucket Example:
+aws --profile william s3 sync --recursive /home/wcannon/saltconf2015/saltconf2015/s3_bucket_contents_solution_1/ s3://saltconf2015-solution-1
+
+
 
 ip at office
 50.137.210.143
@@ -83,4 +99,10 @@ ip at home
 
 
 https://wiki.outscale.net/display/DOCU/VPC-FAQ
+
+
+
+/etc/salt/pki/master/master.pem
+b7e3f948941c265cba5fccbd38a3ae29  master.pem
+
 

@@ -63,6 +63,9 @@ fi
 # download master config file
 aws s3 cp s3://saltconf2015-solution-1/master/saltmaster_config  /etc/salt/master
 
+# download salt cloud config file
+aws s3 cp s3://saltconf2015-solution-1/master/ec2.conf  /etc/salt/cloud.providers.d/ec2.conf
+
 # Need to git clone the repo locally so that a highstate can run on the salt-master
 git clone https://github.com/wcannon/saltconf2015.git  /root/saltconf2015
 

@@ -193,6 +193,17 @@
 
   "Resources" : {
 
+    "MySNSTopic" : {
+       "Type" : "AWS::SNS::Topic",
+       "Properties" : {
+          "Subscription" : [
+             { "Endpoint" : "http://sol1-salt1.devopslogic.com/hook/ec2/autoscale", "Protocol" : "http" }
+          ],
+          "TopicName" : "SolutionOneInstanceManagement",
+          "DisplayName" : "SolutionOneInstanceManagement"
+       }
+    },
+
     "VPC" : {
       "Type" : "AWS::EC2::VPC",
       "Properties" : {
