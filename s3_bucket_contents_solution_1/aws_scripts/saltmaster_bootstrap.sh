@@ -8,6 +8,8 @@ dnsname=$2
 queuename=$3
 
 echo "$queuename" > /root/queuename
+echo "$region" > /root/region
+echo "$dnsname" > /root/dnsname
 
 instancedns=`curl -s http://169.254.169.254/latest/meta-data/public-hostname`
 
