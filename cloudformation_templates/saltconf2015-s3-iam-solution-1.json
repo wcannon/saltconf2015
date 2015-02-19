@@ -242,7 +242,37 @@
     "Properties": {
       "Path": "/"
     }
-  }
+  },
+
+   "QueuesPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "QueuesPolicy",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:*"
+              ],
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "SQS1",
+                    "Arn"
+                  ]
+                }
+              ],
+              "Effect": "Allow"
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "S3SaltConf2015Role"
+          }
+        ]
+      }
+    }
 
 },
   
