@@ -4,15 +4,10 @@
 region=$1
 # expecting the dns name for the server as well
 dnsname=$2
+# queuename
+queuename=$3
 
-# Associate this ec2 instance with an elastic ip address
-## Need local instance id
-#instanceid=`curl -s http://169.254.169.254/latest/meta-data/instance-id`
-#echo $instanceid
-
-## Need eip allocation id
-#aws ec2 associate-address  --region $region --allow-reassociation  --instance-id $instanceid  --allocation-id $eip
-# e.g. aws --region us-west-2 ec2 associate-address  --allow-reassociation   --instance-id i-5731105b  --allocation-id eipalloc-2fcf1b4a
+echo "$3" > /root/queuename
 
 instancedns=`curl -s http://169.254.169.254/latest/meta-data/public-hostname`
 
