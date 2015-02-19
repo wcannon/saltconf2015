@@ -7,7 +7,7 @@ dnsname=$2
 # queuename
 queuename=$3
 
-echo "$3" > /root/queuename
+echo "$queuename" > /root/queuename
 
 instancedns=`curl -s http://169.254.169.254/latest/meta-data/public-hostname`
 

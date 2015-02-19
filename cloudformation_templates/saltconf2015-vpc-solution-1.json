@@ -365,7 +365,7 @@
           "pip install --upgrade awscli\n",
           "aws s3 cp s3://", {"Ref":"BucketName"}, "/aws_scripts/saltmaster_bootstrap.sh .\n",
           "chmod +x saltmaster_bootstrap.sh\n",
-          "/bin/bash ./saltmaster_bootstrap.sh ", {"Ref":"Region"}, " ", "sol1-salt1.devopslogic.com\n", " ", {"Ref":"SQS1"},"\n"
+          "/bin/bash ./saltmaster_bootstrap.sh ", {"Ref":"Region"}, " ", "sol1-salt1.devopslogic.com", " ", {"Ref":"SQS1"}, "\n"
         ]]}}
    }
  },
