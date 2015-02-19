@@ -2,10 +2,11 @@
 
 import salt.client
 
-def it(data):
+def it(miniondata="no miniondata passed"):
   f = open("/tmp/testfile.txt",'w')
-  f.write("Wow....this worked!\n")
-  f.write(data)
+  f.write( "data.mesasge=" )
+  x = str( miniondata['data']['message'] )
+  f.write( x )
   f.write("\n")
   f.close()
   return
