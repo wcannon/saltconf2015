@@ -4,18 +4,40 @@ import json
 
 def get_instance_action(message):
     '''Determines action type (launch / terminate), and returns action type and aws instance-id'''
-    mydict = json.loads(message)
-    messagebody = mydict['Message']
-    bodydict = json.loads(messagebody)
+    try:
+      bodydict = {}
+      mydict = json.loads(message)
+      messagebody = mydict['Message']
+      bodydict = json.loads(messagebody)
+    except Exception, e:
+      print "Error: %s" % e
+      raise
     return bodydict['EC2InstanceId']
 
 def get_instance_id(message):
     '''Returns the aws instance id'''
-    mydict = json.loads(message)
-    messagebody = mydict['Message']
-    bodydict = json.loads(messagebody)
+    try:
+      bodydict = {}
+      mydict = json.loads(message)
+      messagebody = mydict['Message']
+      bodydict = json.loads(messagebody)
+    except Exception, e:
+      print "Error: %s" % e
+      raise
     return bodydict['Event']
 
+def get_body(message):
+    try:
+      bodydict = {}
+      text = message.get_body()
+      mydict = json.loads(text)
+      messagebody = mydict['Message']
+      bodydict = json.loads(messagebody)
+    except Exception, e:
+      print "Error: %s" % e
+      raise
+    return bodydict['Event']
+    
 
 if __name__ == "__main__":
   filename = sys.argv[1]
