@@ -18,7 +18,8 @@ def print_message(message):
   print message.get_body()
   return
 
-def delete_a_message(queue, message):
+def delete_a_message(conn, queue, message):
+  myq = conn.get_queue('sm1')
   myq.delete_message(message)
   return 
 
@@ -27,8 +28,8 @@ if __name__ == "__main__":
   queue = sys.argv[2]
   conn = boto.sqs.connect_to_region(region)
   message1 = get_a_message(conn, queue)
-  print message1
-  #print "queue length: %s" % get_queue_length(conn, queue)
-  #delete_a_message(conn, queue)
-  #print "queue length is now: %s" % get_queue_length(conn, queue)
+  print_message(message1)
+  print "queue length: %s" % get_queue_length(conn, queue)
+  delete_a_message(conn, queue, message1)
+  print "queue length is now: %s" % get_queue_length(conn, queue)
 
