@@ -71,24 +71,33 @@ def call_highstate(minion_id):
   minions = client.cmd_async(tgt=minion_id, fun='state.highstate', arg=[], timeout=1, expr_form='compound')
   return 
 
+def main(minion_id):
+  '''Wrap all this goodness together coherently'''
+  # Return True if this saltmaster runs highstate, False otherwise
+  highstate_already_run = ever_run = check_if_first_highstate_ever(minion_id)
+  if highstate_already_run:
+    #print "Highstate run at least once before.  Exiting."
+    return
+  highstate_running_now = check_if_highstate_running(minion_id)
+  if highstate_running_now:
+    #print "Highstate is already running.  Exiting."
+    return
+  # Looks like we might need to run a highstate
+
+  # Attempt to claim the right to run highstate on minion
+  #print "Attempting to claim the highstate run"
+  write_highstate_runner_claim(minion_id) 
+
+  winner = should_run_highstate(minion_id)
+  if winner:
+    #print "I'm the winner"
+    call_highstate(minion_id)
+    return True
+  else:   
+    #print "Another salt master will run highstate.  Exiting."
+    return False
+
+
 if __name__ == '__main__':
   arguments = docopt(__doc__)
-  # print(arguments)
-  minion_id = arguments['MINION_ID']
-  print
-  print "minion_id: %s" % minion_id
-  print
-  print "Highstate has been run previously: %s" % check_if_first_highstate_ever(minion_id)
-  print 
-  print "Highstate is currently running: %s" % check_if_highstate_running(minion_id)
-  print 
-  print "Attempting to set this salmaster as the highstate runner"
-  print write_highstate_runner_claim(minion_id)
-  print "Should we run the highstate?"
-  print should_run_highstate(minion_id)
-  print "Running highstate"
-  call_highstate(minion_id)
-
-
-  # run a highstate
-
+  main(arguments['MINION_ID'])
