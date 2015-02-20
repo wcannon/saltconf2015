@@ -21,12 +21,12 @@ if __name__ == "__main__":
     new_messages_list = []
     now = time.time()
     for m in messages:
-      print "\n\nmessage body:"
-      print m.get_body()
+      #print "\n\nmessage body:"
+      #print m.get_body()
       action = msg.get_instance_action(m.get_body())
-      print "action: %s" % action
+      #print "action: %s" % action
       instance_id = msg.get_instance_id(m.get_body())
-      print "instance_id: %s" % instance_id
+      #print "instance_id: %s" % instance_id
       event = {}
       #event['status'] = "open"
       event['instance_id'] = instance_id
