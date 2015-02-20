@@ -1,0 +1,12 @@
+{
+  "Type" : "Notification",
+  "MessageId" : "34fc913d-cda0-5d3a-994a-dc5dcec24315",
+  "TopicArn" : "arn:aws:sns:us-east-1:012800249358:SolutionOneInstanceManagement",
+  "Subject" : "Auto Scaling: launch for group \"saltconf2015-vpc-solution-1-SaltminionGroup-HNYC7FBX1N1\"",
+  "Message" : "{\"StatusCode\":\"InProgress\",\"Service\":\"AWS Auto Scaling\",\"AutoScalingGroupName\":\"saltconf2015-vpc-solution-1-SaltminionGroup-HNYC7FBX1N1\",\"Description\":\"Launching a new EC2 instance: i-f4364ddb\",\"ActivityId\":\"a64aa8f3-9904-4046-90b3-487903d5c767\",\"Event\":\"autoscaling:EC2_INSTANCE_LAUNCH\",\"Details\":{\"Availability Zone\":\"us-east-1c\"},\"AutoScalingGroupARN\":\"arn:aws:autoscaling:us-east-1:012800249358:autoScalingGroup:88d06b90-e388-4b21-8f5e-51762055608a:autoScalingGroupName/saltconf2015-vpc-solution-1-SaltminionGroup-HNYC7FBX1N1\",\"Progress\":50,\"Time\":\"2015-02-19T15:28:34.166Z\",\"AccountId\":\"012800249358\",\"RequestId\":\"a64aa8f3-9904-4046-90b3-487903d5c767\",\"StatusMessage\":\"\",\"EndTime\":\"2015-02-19T15:28:34.166Z\",\"EC2InstanceId\":\"i-f4364ddb\",\"StartTime\":\"2015-02-19T15:28:01.365Z\",\"Cause\":\"At 2015-02-19T15:27:59Z an instance was started in response to a difference between desired and actual capacity, increasing the capacity from 0 to 1.\"}",
+  "Timestamp" : "2015-02-19T15:28:34.238Z",
+  "SignatureVersion" : "1",
+  "Signature" : "KHSci5FFOBOsVEBXbtcwS4pZJZQLMyM9uSCDr72fAkwv1GtSRQc361DPSckkVKrxFdHiKa1GxP4kJg+UAlfD2BNVn12hf7eBEq2/wle+lYQIv0Sp1xGmJBE8Rbe9ePzuNapqs3ffasHAvhWetwSHl2+9dj+5Bl+Vep9hUJNYF50g3pGRTQADrZ2ZXJR+zUsZHKSfsNg5Gu3zhU8cCttllBZMePoJdVK5Rr+iGYV2OMpbNz609IUFQM4A0jGhmcTcejim7cOeoG16goF0p0+W4pIZqWaxeA1msaE+T+9V3/tzXsxwiCBTwSaP34Q60gYR6Qx4I+3EiGaHVCD1Emv4IA==",
+  "SigningCertURL" : "https://sns.us-east-1.amazonaws.com/SimpleNotificationService-d6d679a1d18e95c2f9ffcf11f4f9e198.pem",
+  "UnsubscribeURL" : "https://sns.us-east-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-east-1:012800249358:SolutionOneInstanceManagement:6490bdbd-8c26-40ee-b199-aa15d115da1e"
+}
