@@ -663,22 +663,8 @@ pillar_roots:
   base:
     - /srv/pillar
 
-external_auth:
-  pam:
-    myuser:
-      - .*
-      - '@runner'
-      - '@wheel'
-
-rest_cherrypy:
-  port: 8080
-  host: 0.0.0.0
-  webhook_url: /hook
-  webhook_disable_auth: True
-  disable_ssl: True
-  #ssl_crt: /etc/pki/tls/certs/localhost.crt
-  #ssl_key: /etc/pki/tls/certs/localhost.key
-
 reactor:
-  - 'salt/netapi/hook/mytest':
-    - '/srv/reactor/mytest.sls'
+  - 'salt/auth':
+    - '/srv/reactor/key_manager.sls'
+  - 'salt/minion/*/start':
+    - '/srv/reactor/highstate_runner.sls'

@@ -2,8 +2,8 @@
 
 import salt.client
 
-def it(miniondata="no miniondata passed"):
-  f = open("/tmp/testfile.txt",'w')
+def manage(miniondata="no miniondata passed"):
+  f = open("/tmp/highstate_manager.txt",'w')
   f.write( "data.mesasge=" )
   x = str( miniondata['data']['message'] )
   f.write( x )
