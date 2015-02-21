@@ -7,9 +7,6 @@ dnsname=$2
 # queuename
 queuename=$3
 
-echo "$queuename" > /root/queuename
-echo "$region" > /root/region
-echo "$dnsname" > /root/dnsname
 
 instancedns=`curl -s http://169.254.169.254/latest/meta-data/public-hostname`
 
@@ -35,6 +32,15 @@ apt-get install -y salt-doc
 
 # install salt-master
 apt-get install -y salt-master
+
+# set up expected HA dirs - 
+mkdir -p /etc/salt/ha/{runner-output,aws-autoscaling-info}
+
+# populate ha config file with info needed by runner, and keymanager
+echo "queue_name: $queuename" >> /etc/salt/ha/ha-config
+echo "region: $region" >> /etc/salt/ha/ha-config
+echo "dns_name: $dnsname" >> /etc/salt/ha/ha-config
+
 
 # Check to see if our saltmaster.pem file exists by doing a simple ls on the expected location
 info=`aws s3 ls s3://saltconf2015-solution-1/master/master.pem 2>/dev/null`
