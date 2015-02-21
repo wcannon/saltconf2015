@@ -8,7 +8,7 @@ from salt.key import Key
 
 opts = salt.config.master_config('/etc/salt/master')
 mymanager = Key(opts)
-aws_minion_file = "/etc/salt/ha/aws-autoscaling-info/aws_minion_info.json"
+aws_minion_file = "/etc/salt/ha/aws-autoscaling-info/aws_minion_info.yaml"
 
 '''  Reference of yaml on aws_minion_file
 minions:
@@ -19,16 +19,18 @@ minions:
 '''
 
 def load_minion_info(file_path=aws_minion_file):
-  minion_list = [] # useful if sns/sqs have not provided any info = no minion file yet
+  mydict = [] # useful if sns/sqs have not provided any info = no minion file yet
   mystr = "no data"
   try:
     mydict = yaml.load(open(file_path, "r").read())
+    minions = mydict.get('minions', [])
   except Exception, e:
     print "Unable to open file, or convert to dict, giving an empty dict"
     print "Exception: %s" % e
     print "mystr = %s" % mystr
-    print "mydict = %s" % mydict
-  return mydict['minions']
+    print "mydict %s" % mydict
+    raise
+  return minions
 
 def get_key_action_for_minion(minion_list, minion_id):
   '''If we don't find the key, return None, else return whatever the action
@@ -62,21 +64,15 @@ def test_manage(minion_id):
   minion_list = load_minion_info(aws_minion_file)
   key_action = get_key_action_for_minion(minion_list, minion_id)
   if not key_action:  # minion id not found in our lookup list
-    print "no key action - rejecting key"
     reject_key(minion_id)
 
   if key_action == 'accept': # new expected minion from aws autoscaling
-    print "found minion id with action 'accept' - will accept key"
     accept_key(minion_id)
   elif key_action == 'delete': # minion is being terminated by aws autoscaling
-    print "found minion id with action 'delete' - will delete key"
     delete_key(minion_id)
   else:
     mystr = "nothing to do here"
-    print mystr
   return
-
-
 
 def delete_key(minion_id):
   mymanager = Key(opts)
