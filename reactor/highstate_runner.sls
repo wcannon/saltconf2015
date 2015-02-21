@@ -1,4 +1,4 @@
 highstate_runner:
-  highstate_manager.manage:
+  runner.highstate_manager.manage:
     - miniondata: {{ data }}
 
