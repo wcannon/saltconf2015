@@ -666,5 +666,5 @@ pillar_roots:
 reactor:
   - 'salt/auth':
     - '/srv/reactor/key_manager.sls'
-  - 'salt/minion/*/start':
+  - 'salt/key':
     - '/srv/reactor/highstate_runner.sls'
