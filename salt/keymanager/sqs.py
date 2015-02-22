@@ -1,18 +1,41 @@
 #!/usr/bin/env python
-import sys
 import boto.sqs
+import sqs
+import yaml
+import salt
+
+opts = salt.config.master_config('/etc/salt/master')
+aws_minion_file = "/etc/salt/ha/aws-autoscaling-info/aws_minion_info.yaml"
+aws_ha_config_file = "/etc/salt/ha/ha-config"
+
+
+def load_ha_config_info(file_path=aws_ha_config_file):
+  '''This provides access to info such as region, queue_name for
+     connecting to sqs and ec2'''
+  mydict = {} # useful if sns/sqs have not provided any info = no minion file yet
+  try:
+    mydict = yaml.load(open(file_path, "r").read())
+  except Exception, e:
+    print "Exception: %s" % e
+    raise
+  return mydict
 
 def get_queue_length(conn, queue):
   try:
-    myq = conn.get_queue('sm1')
+    myq = conn.get_queue(queue)
   except:
     raise
   return  myq.count()
   
 def get_a_message(conn, queue):
+  '''If we have at least one message in the queue, return it.
+     Otherwise, return None''' 
+  message = None
   try:
-    myq = conn.get_queue('sm1')
-    message = myq.read()
+    myq = conn.get_queue(queue)
+    q_length = myq.count()
+    if q_length > 0:
+      message = myq.read()
   except:
     raise
   return message
@@ -26,7 +49,7 @@ def print_message(message):
 
 def delete_a_message(conn, queue, message):
   try:
-    myq = conn.get_queue('sm1')
+    myq = conn.get_queue(queue)
     myq.delete_message(message)
   except:
     raise
@@ -51,13 +74,16 @@ def main(region, queue_name):
 
 
 if __name__ == "__main__":
-  # e.g. ./msg.py us-east-1 sm1
-  region = sys.argv[1]
-  queue_name = sys.argv[2]
-  try:
-    main(region, queue_name)
-  except:
-    print "Error in sqs message retrieval"
-    raise
-
-
+  info = load_ha_config_info()
+  region = info['region']
+  queue = info['queue_name']
+  conn = boto.sqs.connect_to_region(region)
+  print "info: %s" % info
+  print
+  print "Retrieving a message:"
+  msg = get_a_message(conn, queue)
+  if msg:
+    print_message(msg)
+    delete_a_message(conn, queue, msg)
+  else:
+    print "No messages left to process"
