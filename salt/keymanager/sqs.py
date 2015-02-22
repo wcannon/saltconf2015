@@ -3,7 +3,9 @@ import boto.sqs
 import sqs
 import yaml
 import salt
+import logging
 
+log = logging.getLogger(__name__)
 opts = salt.config.master_config('/etc/salt/master')
 aws_minion_file = "/etc/salt/ha/aws-autoscaling-info/aws_minion_info.yaml"
 aws_ha_config_file = "/etc/salt/ha/ha-config"
@@ -72,6 +74,15 @@ def main(region, queue_name):
     raise
   return message_list    
 
+
+def get_connection(region):
+  conn = None
+  try:
+    conn = boto.sqs.connect_to_region(region)
+  except Exception, e:
+    log.error("Unable to connect to aws sqs")
+    raise 
+  return conn
 
 if __name__ == "__main__":
   info = load_ha_config_info()

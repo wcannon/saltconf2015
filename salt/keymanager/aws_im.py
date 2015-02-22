@@ -1,16 +1,19 @@
 #!/usr/bin/env python
 import sys
-import sqs
-import msg
-import time
 import salt
 import yaml
 from salt.key import Key
+import minion_info
+import msg
+import sqs
+import ec2
+import key_deleter
+import logging
 
-
+log = logging.getLogger(__name__)
 opts = salt.config.master_config('/etc/salt/master')
 mymanager = Key(opts)
-aws_minion_file = "/etc/salt/ha/aws-autoscaling-info/aws_minion_info.yaml"
+aws_minion_file = "/etc/salt/ha/aws-autoscaling-info/aws_minions.yaml"
 aws_ha_config_file = "/etc/salt/ha/ha-config"
 
 
@@ -25,82 +28,45 @@ def load_ha_config_info(file_path=aws_ha_config_file):
     raise
   return mydict
 
-def load_minion_info(file_path=aws_minion_file):
-  '''We maintain this list - minions whose key should be accepted by salt-master when submitted'''
-  mydict = [] # useful if sns/sqs have not provided any info = no minion file yet
-  mystr = "no data"
-  try:
-    mydict = yaml.load(open(file_path, "r").read())
-    minions = mydict.get('minions', [])
-  except Exception, e:
-    print "Unable to open file, or convert to dict, giving an empty dict"
-    print "Exception: %s" % e
-    print "mystr = %s" % mystr
-    print "mydict %s" % mydict
-    raise
-  return minions
-
-def delete_key(minion_id):
-  mymanager = Key(opts)
-  mymanager.delete_key(minion_id)
-  return
 
 if __name__ == "__main__":
   try:
     config_info = load_ha_config_info()
-    print "region: %s" % config_info.get('region', 'no-region-found')
-    print "queue_name: %s" % config_info.get('queue_name', 'no-queue_name-found')
+    region = config_info.get('region', 'no-region-found')
+    print "region: %s" % region
+    queue = config_info.get('queue_name', 'no-queue_name-found')
+    print "queue: %s" % queue
   except:
     print "Unable to open ha-config or read it correctly."
     sys.exit(1)
 
   try:
-    minions = load_minion_info()
-    for m in minions:
-      print m
-  except:
-    print "Unable to load minions file."
+    sqs_conn = sqs.get_connection(region)
+    num_sqs_messages = sqs.get_queue_length(sqs_conn, queue)
+    print "Number of messages to process: %s" % num_sqs_messages
+    for m in range(num_sqs_messages):
+      message = sqs.get_a_message(sqs_conn, queue)
+      if message:
+        instance_id = msg.get_instance_id(message)
+        action = msg.get_instance_action(message)
+        print "action: %s" % action
+        if action == "autoscaling::EC2_INSTANCE_LAUNCH":
+        #if action.find("autoscaling::EC2_INSTANCE_LAUNCH") != -1:
+          ec2_conn = ec2.get_connection(region)
+          minion_id = ec2.get_private_dns_name(ec2_conn, instance_id)
+          print "minion_id: %s" % minion_id
+          item = {'instance_id':instance_id, 'minion_id':minion_id}
+          minion_info.add_minion_entry(item)
+          sqs.delete_a_message(sqs_conn, queue, message)
+        elif action == "autoscaling::ECW_INSTANCE_TERMINATE":
+        #elif action.find("autoscaling::ECW_INSTANCE_TERMINATE") != -1:
+          minion_id = minion_info.get_minion_id_by_instance_id(instance_id) 
+          print "minion_id: %s" % minion_id
+          item = {'instance_id':instance_id, 'minion_id':minion_id}
+          minion_info.remove_minion_entry(item)
+          key_deleter.delete_key(minion_id)
+  except Exception, e:
+    print "\nException!"
+    print e
+    #log.error("Exception: %s" % e)
     sys.exit(1)
-
-'''
-   The general loop
-  	get a message from sqs
-	extract info from message
-	if Launch:
-		lookup minion-id in ec2
-		append minion-id , instance-id to minion info file
-		delete message from sqs queue
-        if Terminate:
-		lookup minion-id in minion info file
-		remove minion-id , instance-id from minion info file
-		delete key from salt-master
-'''
-
-'''
-  try:
-    messages = sqs.main(region, queue_name)
-    print "Received %s messages" % len(messages)
-    new_messages_list = []
-    now = time.time()
-    for m in messages:
-      #print "\n\nmessage body:"
-      #print m.get_body()
-      action = msg.get_instance_action(m.get_body())
-      #print "action: %s" % action
-      instance_id = msg.get_instance_id(m.get_body())
-      #print "instance_id: %s" % instance_id
-      event = {}
-      #event['status'] = "open"
-      event['instance_id'] = instance_id
-      event['action'] = action
-      event['time'] = now # seconds since epoch - when retrieving messages
-      # add later event['highstate_status'] = 
-      event['minion_id'] = '' # placeholder
-      new_messages_list.append(event)
-    for event in new_messages_list:
-      print event
-  except:
-    print "Unable to retrieve sqs messages"
-'''
-  
-

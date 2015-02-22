@@ -22,7 +22,15 @@ def get_private_dns_name(conn, instance_id):
     log.error("Error retrieving info from ec2: %s" % e) # log, but carry on
   return minion_id
   #return myinstances[0].instances[0].private_dns_name 
-  
+
+def get_connection(region):
+  conn = None
+  try:
+    conn = boto.vpc.connect_to_region(region)
+  except Exception, e:
+    log.error("Unable to connect to ec2")
+    raise
+  return conn
 
 if __name__ == "__main__":
   try:
