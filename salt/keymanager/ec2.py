@@ -14,12 +14,13 @@ aws_ha_config_file = "/etc/salt/ha/ha-config"
 # myinstances[0].instances[0].private_dns_name  ---> gives the minion id!
 
 def get_private_dns_name(conn, instance_id):
+  minion_id = None
   try:
     myinstances = conn.get_only_instances(instance_ids=[instance_id])
+    minion_id = myinstances[0].private_dns_name
   except Exception, e:
-    log.error("Error retrieving info from ec2: %s" % e)
-    raise
-  return myinstances[0].private_dns_name
+    log.error("Error retrieving info from ec2: %s" % e) # log, but carry on
+  return minion_id
   #return myinstances[0].instances[0].private_dns_name 
   
 
