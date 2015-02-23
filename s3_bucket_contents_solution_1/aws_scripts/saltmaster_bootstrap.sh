@@ -6,18 +6,9 @@ region=$1
 dnsname=$2
 # queuename
 queuename=$3
+bucketname=$4
+hostedzoneid=$5
 
-
-instancedns=`curl -s http://169.254.169.254/latest/meta-data/public-hostname`
-
-## Update our template rrset dns batch change file
-aws s3 cp s3://saltconf2015-solution-1/master/rrset_template.json /tmp
-#sed  "s/new-dns-name/sol1-salt1.devopslogic.com/" rrset_template.json | sed "s/target-dns-name/ec2.1234awsdns.com/" > rrset2.json
-sed  "s/new-dns-name/$dnsname/" /tmp/rrset_template.json | sed "s/target-dns-name/$instancedns/" > /tmp/rrset2.json
-
-# Create / Update record for sol1-salt1.devopslogic.com
-#aws --region us-east-1 route53 change-resource-record-sets --hosted-zone-id Z2IBYTQ6W9V2HA --change-batch file:///root/rrset2.json
-aws --region us-east-1 route53 change-resource-record-sets --hosted-zone-id Z2IBYTQ6W9V2HA --change-batch file:///tmp/rrset2.json
 
 # set up ppa for saltstack
 add-apt-repository -y ppa:saltstack/salt
@@ -34,13 +25,29 @@ apt-get install -y salt-doc
 apt-get install -y salt-master
 
 # set up expected HA dirs - 
-mkdir -p /etc/salt/ha/{runner-output,aws-autoscaling-info}
+mkdir -p /etc/salt/ha/{runner-output,aws-autoscaling-info,dns-update}
 
 # populate ha config file with info needed by runner, and keymanager
 echo "queue_name: $queuename" >> /etc/salt/ha/ha-config
 echo "region: $region" >> /etc/salt/ha/ha-config
 echo "dns_name: $dnsname" >> /etc/salt/ha/ha-config
+echo "bucket_name: $bucketname" >> /etc/salt/ha/ha-config
+echo "hosted_zone_id: $hostedzoneid" >> /etc/salt/ha/ha-config
 
+
+##instancedns=`curl -s http://169.254.169.254/latest/meta-data/public-hostname`
+
+## Update our template rrset dns batch change file
+##aws s3 cp s3://saltconf2015-solution-1/master/rrset_template.json /tmp
+#sed  "s/new-dns-name/sol1-salt1.devopslogic.com/" rrset_template.json | sed "s/target-dns-name/ec2.1234awsdns.com/" > rrset2.json
+##sed  "s/new-dns-name/$dnsname/" /tmp/rrset_template.json | sed "s/target-dns-name/$instancedns/" > /tmp/rrset2.json
+
+# Create / Update record for sol1-salt1.devopslogic.com
+#aws --region us-east-1 route53 change-resource-record-sets --hosted-zone-id Z2IBYTQ6W9V2HA --change-batch file:///root/rrset2.json
+##aws --region us-east-1 route53 change-resource-record-sets --hosted-zone-id Z2IBYTQ6W9V2HA --change-batch file:///tmp/rrset2.json
+aws s3 cp s3://$bucketname/aws_scripts/dns-update.py /etc/salt/ha/dns-update/dns-update.py
+chmod +x /etc/salt/ha/dns-update/dns-update.py
+python /etc/salt/ha/dns-update/dns-update.py
 
 # Check to see if our saltmaster.pem file exists by doing a simple ls on the expected location
 info=`aws s3 ls s3://saltconf2015-solution-1/master/master.pem 2>/dev/null`

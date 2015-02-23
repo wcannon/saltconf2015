@@ -1,3 +1,6 @@
+#sleep 20:
+#  cmd.run
+
 ntp:
   pkg:
     - installed

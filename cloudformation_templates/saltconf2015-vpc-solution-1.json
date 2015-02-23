@@ -66,6 +66,12 @@
       "Default" : "saltconf2015-s3-solution-1-S3SaltConf2015MinionInstanceProfile-J6X1OY6L8QZD"
     },
 
+    "HostedZoneId" : {
+      "Description" : "The route53 zone id for the saltmaster to update at boot",
+      "Type" : "String",
+      "Default" : "Z2IBYTQ6W9V2HA"
+    },
+
     "BucketName" : {
       "Description" : "Name of the s3 bucket that our vpc will use - bootstrap, data",
       "Type" : "String",
@@ -365,7 +371,7 @@
           "pip install --upgrade awscli\n",
           "aws s3 cp s3://", {"Ref":"BucketName"}, "/aws_scripts/saltmaster_bootstrap.sh .\n",
           "chmod +x saltmaster_bootstrap.sh\n",
-          "/bin/bash ./saltmaster_bootstrap.sh ", {"Ref":"Region"}, " ", "sol1-salt1.devopslogic.com", " ", {"Ref":"SQS1"}, "\n"
+          "/bin/bash ./saltmaster_bootstrap.sh ", {"Ref":"Region"}, " ", "sol1-salt1.devopslogic.com", " ", {"Ref":"SQS1"}, " ", {"Ref":"BucketName"}, " ", {"Ref":"HostedZoneId"}, "\n"
         ]]}}
    }
  },

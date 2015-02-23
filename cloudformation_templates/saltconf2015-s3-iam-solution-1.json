@@ -13,7 +13,16 @@
       "AllowedPattern" : "[-_ a-zA-Z0-9]*",
       "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores.",
       "Default" : "saltconf2015-solution-1"
-    }
+    },
+
+    "HostedZoneId" : {
+      "Description" : "Name of our route53 hosted zone id",
+      "Type" : "String",
+      "MinLength": "1",
+      "MaxLength": "128",
+      "AllowedPattern" : "[-_ a-zA-Z0-9]*",
+      "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores.",
+      "Default" : "Z2IBYTQ6W9V2HA"
 
   },
 
@@ -105,6 +114,7 @@
                     "Effect":"Allow",
                     "Action":["route53:ChangeResourceRecordSets"],
                     "Resource":"arn:aws:route53:::hostedzone/Z2IBYTQ6W9V2HA"
+                    "Resource": {"Fn::Join" : [ "/", ["arn:aws:route53:::hostedzone", {"Ref":"HostedZoneId"} ] }
                     },
                     {
                     "Effect":"Allow",
