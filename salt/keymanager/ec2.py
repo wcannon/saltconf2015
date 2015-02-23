@@ -20,6 +20,7 @@ def get_private_dns_name(conn, instance_id):
     minion_id = myinstances[0].private_dns_name
   except Exception, e:
     log.error("Error retrieving info from ec2: %s" % e) # log, but carry on
+    print "Error: %s" % e
   return minion_id
   #return myinstances[0].instances[0].private_dns_name 
 
