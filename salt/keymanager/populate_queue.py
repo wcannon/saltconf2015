@@ -13,7 +13,7 @@ msg4 = open("instance_launch_msg2.txt", "r").read()
 
 conn = boto.sqs.connect_to_region(region)
 myq = conn.get_queue(queue)
-my_messages = [msg1,msg4,msg3,msg2]
+my_messages = [msg1,msg2,msg3,msg4]
 for msg in my_messages:
   m =  boto.sqs.message.Message()
   m.set_body(msg)
