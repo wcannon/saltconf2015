@@ -667,4 +667,4 @@ reactor:
   - 'salt/auth':
     - '/srv/reactor/key_manager.sls'
   - 'salt/key':
-    - '/srv/reactor/highstate_runner.sls'
+    - '/srv/reactor/highstate_manager.sls'
