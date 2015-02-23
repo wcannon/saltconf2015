@@ -31,10 +31,10 @@ def read_minion_file(file_path=MINION_INFO_FILE):
     minions = yaml.load(open(file_path, "r").read())
   except Exception, e:
     # handling situation where the file does not exist
-    minions = [{}]
-    f = open(MINION_INFO_FILE, 'a')
-    f.write(yaml.dump(minions))
-    f.close()
+    minions = []
+    #f = open(MINION_INFO_FILE, 'a')
+    #f.write(yaml.dump(minions))
+    #f.close()
     #log.error("Exception: %s" % e)
   return minions
 
@@ -48,8 +48,9 @@ def print_minions():
 def add_minion_entry(item):
   try:
     minions = read_minion_file()
-    minions.append(item)
-    write_minion_file(minions)
+    if item not in minions:
+      minions.append(item)
+      write_minion_file(minions)
   except Exception, e:
     print "Exception: %s" % e 
     log.error("Exception: %s" % e)
