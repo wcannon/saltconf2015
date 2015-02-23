@@ -9,4 +9,4 @@ docopt-install:
 /var/spool/cron/crontabs/root:
   file:
     - append
-    - text: "@reboot /usr/bin/python /etc/salt/ha/dns-update/dns-update.py"
+    - text: "@reboot /usr/bin/python /etc/salt/ha/dns-update/dns_update.py"
