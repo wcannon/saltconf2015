@@ -7,6 +7,7 @@ import minion_info
 import msg
 import sqs
 import ec2
+import time
 import key_deleter
 import logging
 
@@ -15,6 +16,7 @@ opts = salt.config.master_config('/etc/salt/master')
 mymanager = Key(opts)
 aws_minion_file = "/etc/salt/ha/aws-autoscaling-info/aws_minions.yaml"
 aws_ha_config_file = "/etc/salt/ha/ha-config"
+SLEEPTIME = 10
 
 
 def load_ha_config_info(file_path=aws_ha_config_file):
@@ -28,8 +30,7 @@ def load_ha_config_info(file_path=aws_ha_config_file):
     raise
   return mydict
 
-
-if __name__ == "__main__":
+def loop():
   try:
     config_info = load_ha_config_info()
     region = config_info.get('region', 'no-region-found')
@@ -78,3 +79,17 @@ if __name__ == "__main__":
     print e
     #log.error("Exception: %s" % e)
     sys.exit(1)
+
+
+def main(t = SLEEPTIME):
+  while True:
+    time.sleep(t)
+    loop()
+
+if __name__ == "__main__":
+  try:
+    main()
+  except Exception, e:
+    log.error("Exception: %s" % e)
+    print "Exception: %s" % e
+
