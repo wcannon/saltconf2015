@@ -23,7 +23,7 @@
       "AllowedPattern" : "[-_ a-zA-Z0-9]*",
       "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores.",
       "Default" : "Z2IBYTQ6W9V2HA"
-
+    }
   },
 
   "Mappings" : {
@@ -118,8 +118,7 @@
                     {
                     "Effect":"Allow",
                     "Action":["route53:ChangeResourceRecordSets"],
-                    "Resource":"arn:aws:route53:::hostedzone/Z2IBYTQ6W9V2HA"
-                    "Resource": {"Fn::Join" : [ "/", ["arn:aws:route53:::hostedzone", {"Ref":"HostedZoneId"} ] }
+                    "Resource": {"Fn::Join" : [ "/", ["arn:aws:route53:::hostedzone", {"Ref":"HostedZoneId"} ] ] }
                     },
                     {
                     "Effect":"Allow",
@@ -329,6 +328,6 @@
     "MySNSTopicARN":{
       "Value":{"Ref":"SNSSolutionOne"}  
     }
-} 
+ } 
 
 }
