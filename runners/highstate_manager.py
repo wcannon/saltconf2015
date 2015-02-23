@@ -27,7 +27,7 @@ def check_if_first_highstate_ever(minion_id):
   client = salt.client.LocalClient()
   # file.path_exists_glob /root/most_recent_salt_highstate_run.txt
   #mypath = ["/root/most_recent_salt_highstate_run.txt"]
-  mypath = ["/etc/salt/ha/highstate_ran_once"]
+  mypath = ["/etc/salt/highstate_ran_once"]
   results_by_minion = client.cmd(tgt=[minion_id], fun='file.path_exists_glob', arg=mypath, expr_form='list')   # sync call
   log.info("results_by_minion: %s" % results_by_minion)
   
@@ -92,7 +92,7 @@ def write_highstate_ran(minion_id):
      highstate on it.  First in wins.
      /tmp/highstate_runner'''
   client = salt.client.LocalClient()
-  path = "/etc/salt/ha/highstate_ran_once"
+  path = "/etc/salt/highstate_ran_once"
   seconds = time.time()
   results = client.cmd(tgt=minion_id, fun='file.touch', arg=[path])   # sync call
   results_by_minion = client.cmd(tgt=minion_id, fun='file.append', arg=[path, seconds])   # sync call
@@ -101,6 +101,7 @@ def write_highstate_ran(minion_id):
 def main(minion_id):
   '''Wrap all this goodness together coherently'''
   # Return True if this saltmaster runs highstate, False otherwise
+  log.info("Entered main of highstate_runner")
   highstate_already_run =  check_if_first_highstate_ever(minion_id)
   if highstate_already_run:
     print "Highstate run at least once before.  Exiting."
@@ -123,7 +124,7 @@ def main(minion_id):
     print "I'm the winner"
     log.info("I'm the winner")
     call_highstate(minion_id)
-    write_highstate_ran(minion_id):
+    write_highstate_ran(minion_id)
     return True
   else:   
     print "Another salt master will run highstate.  Exiting."
