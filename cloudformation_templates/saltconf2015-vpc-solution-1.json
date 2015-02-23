@@ -18,7 +18,7 @@
       "Type" : "String",
       "MinLength": "1",
       "MaxLength": "256",
-      "Default" : "https://sqs.us-east-1.amazonaws.com/012800249358/sm1"
+      "Default" : "sm1"
     },
 
     "KeyName" : {

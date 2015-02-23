@@ -45,9 +45,9 @@ echo "hosted_zone_id: $hostedzoneid" >> /etc/salt/ha/ha-config
 # Create / Update record for sol1-salt1.devopslogic.com
 #aws --region us-east-1 route53 change-resource-record-sets --hosted-zone-id Z2IBYTQ6W9V2HA --change-batch file:///root/rrset2.json
 ##aws --region us-east-1 route53 change-resource-record-sets --hosted-zone-id Z2IBYTQ6W9V2HA --change-batch file:///tmp/rrset2.json
-aws s3 cp s3://$bucketname/aws_scripts/dns-update.py /etc/salt/ha/dns-update/dns-update.py
-chmod +x /etc/salt/ha/dns-update/dns-update.py
-python /etc/salt/ha/dns-update/dns-update.py
+aws s3 cp s3://$bucketname/aws_scripts/dns_update.py /etc/salt/ha/dns-update/dns_update.py
+chmod +x /etc/salt/ha/dns-update/dns_update.py
+python /etc/salt/ha/dns-update/dns_update.py
 
 # Check to see if our saltmaster.pem file exists by doing a simple ls on the expected location
 info=`aws s3 ls s3://saltconf2015-solution-1/master/master.pem 2>/dev/null`
