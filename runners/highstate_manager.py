@@ -12,6 +12,7 @@ Options:
 
 """
 from docopt import docopt
+import time
 import salt.client
 import socket
 import logging
@@ -25,7 +26,8 @@ def check_if_first_highstate_ever(minion_id):
   log.info('FUNCTION: check_if_first_highstate_ever')
   client = salt.client.LocalClient()
   # file.path_exists_glob /root/most_recent_salt_highstate_run.txt
-  mypath = ["/root/most_recent_salt_highstate_run.txt"]
+  #mypath = ["/root/most_recent_salt_highstate_run.txt"]
+  mypath = ["/etc/salt/ha/highstate_ran_once"]
   results_by_minion = client.cmd(tgt=[minion_id], fun='file.path_exists_glob', arg=mypath, expr_form='list')   # sync call
   log.info("results_by_minion: %s" % results_by_minion)
   
@@ -85,6 +87,17 @@ def call_highstate(minion_id):
   minions = client.cmd_async(tgt=minion_id, fun='state.highstate', arg=[], timeout=1, expr_form='compound')
   return 
 
+def write_highstate_ran(minion_id):
+  '''Write our saltmaster's id into a file on the minion, designating which saltmaster gets to run the
+     highstate on it.  First in wins.
+     /tmp/highstate_runner'''
+  client = salt.client.LocalClient()
+  path = "/etc/salt/ha/highstate_ran_once"
+  seconds = time.time()
+  results = client.cmd(tgt=minion_id, fun='file.touch', arg=[path])   # sync call
+  results_by_minion = client.cmd(tgt=minion_id, fun='file.append', arg=[path, seconds])   # sync call
+  return
+
 def main(minion_id):
   '''Wrap all this goodness together coherently'''
   # Return True if this saltmaster runs highstate, False otherwise
@@ -110,6 +123,7 @@ def main(minion_id):
     print "I'm the winner"
     log.info("I'm the winner")
     call_highstate(minion_id)
+    write_highstate_ran(minion_id):
     return True
   else:   
     print "Another salt master will run highstate.  Exiting."
