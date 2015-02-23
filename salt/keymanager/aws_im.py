@@ -55,9 +55,9 @@ if __name__ == "__main__":
         #print "action: %s" % action
         #if action == "autoscaling::EC2_INSTANCE_LAUNCH":
         #if action.find("autoscaling::EC2_INSTANCE_LAUNCH") != -1:
+        ec2_conn = ec2.get_connection(region)
         if action and action.find("LAUNCH") != -1:
           #print "connecting to ec2"
-          ec2_conn = ec2.get_connection(region)
           minion_id = ec2.get_private_dns_name(ec2_conn, instance_id)
           #print "minion_id: %s" % minion_id
           item = {'instance_id':str(instance_id), 'minion_id':str(minion_id)}
