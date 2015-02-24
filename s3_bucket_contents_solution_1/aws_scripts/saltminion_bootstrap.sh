@@ -16,7 +16,6 @@ aws s3 cp s3://saltconf2015-solution-1/minion/webserver-grains /etc/salt/grains
 
 service salt-minion restart
 
-# the plan is for the minion key to be sent to the master
-# the salt-master auto accepts the key
-# a reactor on the master instructs the minion to run a highstate
-# if a highstate has not been run previously (e.g. previous saltmaster)
+aws s3 cp s3://saltconf2015-solution-1/aws_scripts/restart_salt_minion.py /etc/salt/restart_salt_minion.py
+chmod +x /etc/salt/restart_salt_minion.py
+echo "*/3 * * * * /usr/bin/python /etc/salt/restart_salt_minion.py" >> /var/spool/cron/crontabs/root
