@@ -4,7 +4,7 @@ import subprocess
 def get_service_running(svc_name):
   result = False
   try:
-    output = subprocess.check_output(["service", svc_name, "status"])
+    output = subprocess.check_output(["/usr/sbin/service", svc_name, "status"])
     if "running" in output:
       result = True
     else:
@@ -17,7 +17,7 @@ def get_service_running(svc_name):
 def start_service(svc_name):
   result = False
   try:
-    output = subprocess.check_output(["service", svc_name, "start"])
+    output = subprocess.check_output(["/usr/sbin/service", svc_name, "start"])
     if "running" in output:
       result = True
     else:
