@@ -429,7 +429,7 @@
           "aws s3 cp s3://", {"Ref":"BucketName"}, "/aws_scripts/saltminion_bootstrap.sh .\n",
           "aws s3 cp s3://", {"Ref":"BucketName"}, "/aws_scripts/minion/restart_salt_minion.py /etc/salt/restart_salt_minion.py\n",
           "chmod +x /etc/salt/restart_salt_minion.py\n",
-          "echo '*/3 * * * * /usr/bin/python /etc/salt/restart_salt_minion.py' >> /var/spool/cron/crontabs/root"
+          "echo '*/3 * * * * /usr/bin/python /etc/salt/restart_salt_minion.py >> /var/spool/cron/crontabs/root'\n",
           "chmod +x saltminion_bootstrap.sh\n",
           "/bin/bash ./saltminion_bootstrap.sh\n"
         ]]}}
