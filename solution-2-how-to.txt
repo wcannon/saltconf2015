@@ -71,14 +71,14 @@ TO DO Next:
 ---------------------------
 aws --profile william cloudformation create-stack --region us-east-1 --stack-name saltconf2015-s3-solution-2  --template-body file:////home/wcannon/saltconf2015/saltconf2015/cloudformation_templates/saltconf2015-s3-iam-solution-2.json --capabilities CAPABILITY_IAM
 
-aws --profile william cloudformation create-stack --region us-east-1 --stack-name saltconf2015-vpc-solution-2 --template-body file:////home/wcannon/saltconf2015/saltconf2015/cloudformation_templates/saltconf2015-vpc-solution-2.json --parameters ParameterKey=KeyName,ParameterValue=saltconf2015  ParameterKey=BucketName,ParameterValue=saltconf2015-solution-2 ParameterKey=Region,ParameterValue=us-east-1 ParameterKey=SSHFrom,ParameterValue=75.168.164.12/32 ParameterKey=InstanceType,ParameterValue=t2.small ParameterKey=InstanceProfile,ParameterValue=saltconf2015-s3-solution-1-S3SaltConf2015InstanceProfile-CHTJB4OGHLJD
+aws --profile william cloudformation create-stack --region us-east-1 --stack-name saltconf2015-vpc-solution-2 --template-body file:////home/wcannon/saltconf2015/saltconf2015/cloudformation_templates/saltconf2015-vpc-solution-2.json --parameters ParameterKey=KeyName,ParameterValue=saltconf2015  ParameterKey=BucketName,ParameterValue=saltconf2015-solution-2 ParameterKey=Region,ParameterValue=us-east-1 ParameterKey=SSHFrom,ParameterValue=75.168.164.12/32 ParameterKey=InstanceType,ParameterValue=t2.small 
 
 # Update Stack Examples
 ---------------------------
 ---------------------------
 aws --profile william cloudformation update-stack --region us-east-1 --stack-name saltconf2015-s3-solution-2  --template-body file:////home/wcannon/saltconf2015/saltconf2015/cloudformation_templates/saltconf2015-s3-iam-solution-2.json --capabilities CAPABILITY_IAM
 
-aws --profile william cloudformation update-stack --region us-east-1 --stack-name saltconf2015-vpc-solution-1 --template-body file:////home/wcannon/saltconf2015/saltconf2015/cloudformation_templates/saltconf2015-vpc-solution-1.json --parameters ParameterKey=KeyName,ParameterValue=saltconf2015  ParameterKey=BucketName,ParameterValue=saltconf2015-solution-1 ParameterKey=Region,ParameterValue=us-east-1 ParameterKey=SSHFrom,ParameterValue=75.168.164.12/32 ParameterKey=InstanceType,ParameterValue=t2.small ParameterKey=InstanceProfile,ParameterValue=saltconf2015-s3-solution-1-S3SaltConf2015InstanceProfile-CHTJB4OGHLJD
+aws --profile william cloudformation update-stack --region us-east-1 --stack-name saltconf2015-vpc-solution-2 --template-body file:////home/wcannon/saltconf2015/saltconf2015/cloudformation_templates/saltconf2015-vpc-solution-2.json --parameters ParameterKey=KeyName,ParameterValue=saltconf2015  ParameterKey=BucketName,ParameterValue=saltconf2015-solution-2 ParameterKey=Region,ParameterValue=us-east-1 ParameterKey=SSHFrom,ParameterValue=75.168.164.12/32 ParameterKey=InstanceType,ParameterValue=t2.small 
 
 # Update bucket Example:
 ---------------------------
