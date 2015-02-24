@@ -13,8 +13,17 @@
       "AllowedPattern" : "[-_ a-zA-Z0-9]*",
       "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores.",
       "Default" : "saltconf2015-solution-2"
-    }
+    },
 
+    "HostedZoneId" : {
+      "Description" : "Name of our route53 hosted zone id",
+      "Type" : "String",
+      "MinLength": "1",
+      "MaxLength": "128",
+      "AllowedPattern" : "[-_ a-zA-Z0-9]*",
+      "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores.",
+      "Default" : "Z2IBYTQ6W9V2HA"
+    }
   },
 
   "Mappings" : {
@@ -22,13 +31,66 @@
 
   "Resources" : {
 
+  "SQS1" :
+    {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+         "DelaySeconds": "0",
+         "QueueName": "sol2-sm1"
+      }
+    },
+  "SQS2" :
+    {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+         "DelaySeconds": "0",
+         "QueueName": "sol2-sm2"
+      }
+    },
+  "MyQueuePolicy":{
+      "Type":"AWS::SQS::QueuePolicy",
+      "Properties":{        
+        "PolicyDocument":{
+          "Version":"2012-10-17",
+          "Id":"MyQueuePolicy",
+          "Statement":[
+            {
+              "Sid":"Allow-SendMessage-To-Queues-From-SNS-Topic",
+	      "Effect":"Allow",           
+	      "Principal":"*",
+ 	      "Action":["sqs:SendMessage"],
+	      "Resource":"*",
+              "Condition":{
+                "ArnEquals":{
+                  "aws:SourceArn":{"Ref":"SNSSolutionOne"}
+                }
+              }
+            }
+          ]
+        },
+        "Queues":[{"Ref":"SQS1"}, {"Ref":"SQS2"}]
+      }
+  },
+
+    "SNSSolutionTwo" : {
+       "Type" : "AWS::SNS::Topic",
+       "Properties" : {
+          "Subscription" : [
+             { "Endpoint" : { "Fn::GetAtt" : ["SQS1", "Arn"]}, "Protocol" : "sqs" },
+             { "Endpoint" : { "Fn::GetAtt" : ["SQS2", "Arn"]}, "Protocol" : "sqs" }
+          ],
+          "TopicName" : "SolutionTwoInstanceManagement",
+          "DisplayName" : "SolutionTwoInstanceManagement"
+       }
+    },
+
    "SaltConf2015Bucket": {
      "Type" : "AWS::S3::Bucket",
      "Properties" : {
        "AccessControl" : "Private",
        "BucketName" : { "Ref" : "BucketName"},
        "Tags" : [ 
-                 { "Key" : "Purpose", "Value" :  "SaltConf2015" }
+                 { "Key" : "Purpose", "Value" :  "SaltConf2015-SolutionTwo" }
                 ]
       }
     },
@@ -52,6 +114,31 @@
                "PolicyDocument": {
                   "Version" : "2012-10-17",
                   "Statement": [ 
+                    {
+                    "Effect":"Allow",
+                    "Action": ["sqs:*"],
+                    "Resource": {"Fn::GetAtt": ["SQS1","Arn"] }
+                    },
+                    {
+                    "Effect":"Allow",
+                    "Action": ["sqs:*"],
+                    "Resource": {"Fn::GetAtt": ["SQS2","Arn"] }
+                    },
+                    {
+                    "Effect":"Allow",
+                    "Action": ["ec2:DescribeInstances","ec2:DescribeAddresses","ec2:DescribeInstanceStatus","ec2:DescribeNetworkInterfaces","ec2:DescribeTags"],
+                    "Resource": "*"
+                    },
+                    {
+                    "Effect":"Allow",
+                    "Action":["route53:ChangeResourceRecordSets"],
+                    "Resource": {"Fn::Join" : [ "/", ["arn:aws:route53:::hostedzone", {"Ref":"HostedZoneId"} ] ] }
+                    },
+                    {
+                    "Effect":"Allow",
+                    "Action":["route53:GetChange"],
+                    "Resource":"arn:aws:route53:::change/*"
+                    },
                     {
                      "Effect": "Allow",
                      "Action": "s3:*",
@@ -111,7 +198,109 @@
     "Properties": {
       "Path": "/"
     }
-  }
+  },
+
+  "S3SaltConf2015MinionRole": {
+         "Type": "AWS::IAM::Role",
+         "Properties": {
+            "AssumeRolePolicyDocument": {
+               "Version" : "2012-10-17",
+               "Statement": [ {
+                  "Effect": "Allow",
+                  "Principal": {
+                     "Service": [ "ec2.amazonaws.com" ]
+                  },
+                  "Action": [ "sts:AssumeRole" ]
+               } ]
+            },
+            "Path": "/",
+            "Policies": [ {
+               "PolicyName": "saltconf2015minionrole",
+               "PolicyDocument": {
+                  "Version" : "2012-10-17",
+                  "Statement": [ 
+                    {
+                     "Effect": "Allow",
+                     "Action": "s3:*",
+                     "Resource": ["arn:aws:s3:::saltconf2015-solution-2",
+                                  "arn:aws:s3:::saltconf2015-solution-2/*"]
+                    },
+                    {"Effect": "Allow",
+                     "Action": "s3:ListAllMyBuckets",
+                     "Resource": "arn:aws:s3:::*"
+                    }
+                 ]
+               }
+               } ]
+            }
+   },
+   "S3SaltConf2015MinionInstanceProfile": {
+         "Type": "AWS::IAM::InstanceProfile",
+         "Properties": {
+            "Path": "/",
+            "Roles": [ {
+               "Ref": "S3SaltConf2015MinionRole"
+            } ]
+         }
+   },
+
+  "S3GroupPolicy3" : {
+    "Type" : "AWS::IAM::Policy",
+    "Properties" : {
+      "Groups" : [ { "Ref" : "SaltConf2015MinionGroup" } ],
+      "PolicyName" : "saltconfs3bucketminionpolicy",
+      "PolicyDocument" : {
+         "Version" : "2012-10-17",
+         "Statement": [ 
+          {
+            "Effect": "Allow",
+            "Action": [ "s3:*" ],
+            "Resource": ["arn:aws:s3:::saltconf2015-solution-2", "arn:aws:s3:::saltconf2015-solution-2/*"]
+          },
+          {"Effect": "Allow",
+            "Action": [ "s3:ListAllMyBuckets" ],
+            "Resource": "arn:aws:s3:::*"
+          }
+         ]
+      }
+   }
+  },
+  "SaltConf2015MinionGroup": {
+    "Type" : "AWS::IAM::Group",
+    "Properties": {
+      "Path": "/"
+    }
+  },
+
+   "QueuesPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "QueuesPolicy",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:*"
+              ],
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "SQS1",
+                    "Arn"
+                  ]
+                }
+              ],
+              "Effect": "Allow"
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "S3SaltConf2015Role"
+          }
+        ]
+      }
+    }
 
 },
   
@@ -137,7 +326,22 @@
    "S3SaltConf2015InstanceArn" : {
       "Value" :  {"Fn::GetAtt" : ["S3SaltConf2015InstanceProfile", "Arn"] },
       "Description" : "AWS ARN of S3SaltConf2015InstanceProfile"
-   }
-} 
+   },
+   "S3SaltConf2015MinionInstanceProfile" : {
+      "Value" : { "Ref" : "S3SaltConf2015MinionInstanceProfile"},
+      "Description" : "Reference name of S3SaltConf2015MinionInstanceProfile"
+   },
+   "QueueURL" : {
+      "Description" : "URL of newly created sqs queue",
+      "Value" : { "Ref" : "SQS1" }
+     },
+   "QueueARN" : {
+      "Description" : "ARN of newly created sqs queue",
+      "Value" : { "Fn::GetAtt" : [ "SQS1", "Arn"] }
+     },
+    "MySNSTopicARN":{
+      "Value":{"Ref":"SNSSolutionOne"}  
+    }
+ } 
 
 }
