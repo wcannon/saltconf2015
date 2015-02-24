@@ -1,7 +1,7 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
 
-  "Description" : "This CloudFormation template will instantiate an S3 bucket and the IAM role to access the bucket.  This ensures that a permanent data storage is available",
+  "Description" : "This CloudFormation template instantiates an S3 bucket, SNS, SQS queues, IAM roles/profiles and etc.  This ensures that the permanent data storage and transport is available",
 
   "Parameters" : {
 
@@ -62,7 +62,7 @@
 	      "Resource":"*",
               "Condition":{
                 "ArnEquals":{
-                  "aws:SourceArn":{"Ref":"SNSSolutionOne"}
+                  "aws:SourceArn":{"Ref":"SNSSolutionTwo"}
                 }
               }
             }
@@ -309,7 +309,7 @@
       "Value" : { "Fn::Join" : [
          "", [ "https://", { "Fn::GetAtt" : [ "SaltConf2015Bucket", "DomainName" ] } ]
       ] },
-      "Description" : "Name of S3 bucket for saltconf 2015 solution 1"
+      "Description" : "Name of S3 bucket for saltconf 2015 solution 2"
    },
    "S3SaltConf2015Role" : {
       "Value" : { "Ref": "S3SaltConf2015Role"},
@@ -339,8 +339,16 @@
       "Description" : "ARN of newly created sqs queue",
       "Value" : { "Fn::GetAtt" : [ "SQS1", "Arn"] }
      },
+   "QueueURL2" : {
+      "Description" : "URL of newly created sqs queue",
+      "Value" : { "Ref" : "SQS2" }
+     },
+   "QueueARN2" : {
+      "Description" : "ARN of newly created sqs queue",
+      "Value" : { "Fn::GetAtt" : [ "SQS2", "Arn"] }
+     },
     "MySNSTopicARN":{
-      "Value":{"Ref":"SNSSolutionOne"}  
+      "Value":{"Ref":"SNSSolutionTwo"}  
     }
  } 
 
