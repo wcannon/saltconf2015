@@ -27,6 +27,15 @@ apt-get install -y salt-master
 # set up expected HA dirs - 
 mkdir -p /etc/salt/ha/{runner-output,aws-autoscaling-info,dns-update}
 
+# Check to see if our expected minions list has been created by the last existing SaltMaster
+# This the data file maintained by aws_im.py - minions to accept
+info=`aws s3 ls s3://saltconf2015-solution-2/master/aws_minions.yaml 2>/dev/null`
+
+if [ $? -eq 0 ]
+then
+  aws s3 cp s3://saltconf2015-solution-2/master/aws_minions.yaml  /etc/salt/ha/aws-autoscaling-info/aws_minions.yaml
+fi
+
 # populate ha config file with info needed by runner, and keymanager
 echo "queue_name: $queuename" >> /etc/salt/ha/ha-config
 echo "region: $region" >> /etc/salt/ha/ha-config

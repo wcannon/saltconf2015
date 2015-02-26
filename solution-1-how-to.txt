@@ -17,7 +17,7 @@ clone github repo
 git clone git@github.com:wcannon/saltconf2015.git
 
 
-Set up "permanent" s3 bucket and iam profiles
+Set up "permanent" s3 bucket, sns, sqs queues, and iam roles and profiles
 * Note: bucket name differences will require a slight change in commands below
 ---------------------------------------------
 cd into saltconf2015/cloudformation_templates (from git clone subdir)
@@ -28,9 +28,9 @@ aws --profile william cloudformation create-stack --region us-east-1 --stack-nam
 ** get output values of cloudformation stack (either in aws cloudformation console, or via aws cli tools)
 
 Set up aws credentials (either with the new user info created in from cloudformation template saltconf_s3_iam.json or another account with permissions)
+* in my case I created a profile of 'william' to make the usage explicit
 ----------------------
 aws configure
-
 
 cd into saltconf2015/ (parent directory)
 
@@ -44,27 +44,10 @@ Create vpc and etc. with autoscaling group
 
 aws --profile william cloudformation create-stack --region us-east-1 --stack-name saltconf2015-vpc-solution-1 --template-body file:////home/wcannon/saltconf2015/saltconf2015/cloudformation_templates/saltconf2015-vpc-solution-1.json --parameters ParameterKey=KeyName,ParameterValue=saltconf2015  ParameterKey=BucketName,ParameterValue=saltconf2015-solution-1 ParameterKey=Region,ParameterValue=us-east-1 ParameterKey=SSHFrom,ParameterValue=75.168.148.128/32 ParameterKey=InstanceType,ParameterValue=t2.small ParameterKey=InstanceProfile,ParameterValue=saltconf2015-s3-solution-1-S3SaltConf2015InstanceProfile-CHTJB4OGHLJD
 
-While the instance spins up, and before it switches to using the elastic ip the bootstrap process can be watched:
+While the instance spins up, and before it update the dns cname of the saltmaster the bootstrap process can be watched:
+* very handy method to debug the UserData script from ec2
+ssh -i ~/.ssh/saltconf2015.pem ubuntu@a.b.c.d
 tail -f /var/log/cloud-init-output.log 
-
-When lines occur (like below) the ec2 instance has associated itself with an elastic ip address:
-{
-    "AssociationId": "eipassoc-1c506a79"
-}
-
-
-TO DO Next:
-
-** Work completely separately using another account
-1.  bucket name / folder / must be set in master bootstrap for sync'ing the master and minion keys
-
-2.  salt master key push up to s3 if not there
-    salt master - pull down minion keys from s3
-3.  salt reactor for saving minion keys to s3 on key acceptance
-4.  add cname auto update to cloudformation - to make it easy for minions to find saltmaster
-5.  remove password from user creation in s3_iam cloudformation template - pass it in as a ParameterKey
-6.  run of highstate after accepting any key
-7.  easy way to assign grains to new servers
 
 
 
@@ -73,7 +56,7 @@ Reference commands:
 # Create Stack Examples
 aws --profile william cloudformation create-stack --region us-east-1 --stack-name saltconf2015-s3-solution-1  --template-body file:////home/wcannon/saltconf2015/saltconf2015/cloudformation_templates/saltconf2015-s3-iam-solution-1.json --capabilities CAPABILITY_IAM
 
-aws --profile william cloudformation create-stack --region us-east-1 --stack-name saltconf2015-vpc-solution-1 --template-body file:////home/wcannon/saltconf2015/saltconf2015/cloudformation_templates/saltconf2015-vpc-solution-1.json --parameters ParameterKey=KeyName,ParameterValue=saltconf2015  ParameterKey=BucketName,ParameterValue=saltconf2015-solution-1 ParameterKey=Region,ParameterValue=us-east-1 ParameterKey=SSHFrom,ParameterValue=75.168.164.12/32 ParameterKey=InstanceType,ParameterValue=t2.small ParameterKey=InstanceProfile,ParameterValue=saltconf2015-s3-solution-1-S3SaltConf2015InstanceProfile-CHTJB4OGHLJD
+aws --profile william cloudformation create-stack --region us-east-1 --stack-name saltconf2015-vpc-solution-1 --template-body file://///Users/wcannon/SaltConf2015/saltconf2015/cloudformation_templates/saltconf2015-vpc-solution-1.json --parameters ParameterKey=KeyName,ParameterValue=saltconf2015  ParameterKey=BucketName,ParameterValue=saltconf2015-solution-1 ParameterKey=Region,ParameterValue=us-east-1 ParameterKey=SSHFrom,ParameterValue=75.168.164.12/32 ParameterKey=InstanceType,ParameterValue=t2.small ParameterKey=InstanceProfile,ParameterValue=saltconf2015-s3-solution-1-S3SaltConf2015InstanceProfile-CHTJB4OGHLJD
 
 aws --profile william cloudformation create-stack --region us-east-1 --stack-name saltconf2015-vpc-solution-1 --template-body file:////home/wcannon/saltconf2015/saltconf2015/cloudformation_templates/saltconf2015-vpc-solution-1.json --parameters ParameterKey=KeyName,ParameterValue=saltconf2015  ParameterKey=BucketName,ParameterValue=saltconf2015-solution-1 ParameterKey=Region,ParameterValue=us-east-1 ParameterKey=SSHFrom,ParameterValue=50.137.210.143/32 ParameterKey=InstanceType,ParameterValue=t2.small ParameterKey=InstanceProfile,ParameterValue=saltconf2015-s3-solution-1-S3SaltConf2015InstanceProfile-CHTJB4OGHLJD
 
@@ -88,20 +71,4 @@ aws --profile william cloudformation update-stack --region us-east-1 --stack-nam
 
 # Update bucket Example:
 aws --profile william s3 sync --recursive /home/wcannon/saltconf2015/saltconf2015/s3_bucket_contents_solution_1/ s3://saltconf2015-solution-1
-
-
-
-ip at office
-50.137.210.143
-
-ip at home
-75.168.164.12
-
-https://wiki.outscale.net/display/DOCU/VPC-FAQ
-
-
-
-/etc/salt/pki/master/master.pem
-b7e3f948941c265cba5fccbd38a3ae29  master.pem
-
 

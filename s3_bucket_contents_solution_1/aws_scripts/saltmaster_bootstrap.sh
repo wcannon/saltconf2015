@@ -27,6 +27,15 @@ apt-get install -y salt-master
 # set up expected HA dirs - 
 mkdir -p /etc/salt/ha/{runner-output,aws-autoscaling-info,dns-update}
 
+# Check to see if our expected minions list has been created by the last existing SaltMaster
+# This the data file maintained by aws_im.py - minions to accept
+info=`aws s3 ls s3://saltconf2015-solution-1/master/aws_minions.yaml 2>/dev/null`
+
+if [ $? -eq 0 ]
+then
+  aws s3 cp s3://saltconf2015-solution-1/master/aws_minions.yaml  /etc/salt/ha/aws-autoscaling-info/aws_minions.yaml
+fi
+
 # populate ha config file with info needed by runner, and keymanager
 echo "queue_name: $queuename" >> /etc/salt/ha/ha-config
 echo "region: $region" >> /etc/salt/ha/ha-config
@@ -69,9 +78,6 @@ fi
 
 # download master config file
 aws s3 cp s3://saltconf2015-solution-1/master/saltmaster_config  /etc/salt/master
-
-# download salt cloud config file
-aws s3 cp s3://saltconf2015-solution-1/master/ec2.conf  /etc/salt/cloud.providers.d/ec2.conf
 
 # Need to git clone the repo locally so that a highstate can run on the salt-master
 git clone https://github.com/wcannon/saltconf2015.git  /root/saltconf2015
