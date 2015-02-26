@@ -71,4 +71,5 @@ aws --profile william cloudformation update-stack --region us-east-1 --stack-nam
 
 # Update bucket Example:
 aws --profile william s3 sync --recursive /home/wcannon/saltconf2015/saltconf2015/s3_bucket_contents_solution_1/ s3://saltconf2015-solution-1
+aws --profile william s3 sync --recursive /Users/wcannon/SaltConf2015/saltconf2015/s3_bucket_contents_solution_1/ s3://saltconf2015-solution-1
 

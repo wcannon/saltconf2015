@@ -84,3 +84,4 @@ aws --profile william cloudformation update-stack --region us-east-1 --stack-nam
 ---------------------------
 ---------------------------
 aws --profile william s3 sync --recursive /home/wcannon/saltconf2015/saltconf2015/s3_bucket_contents_solution_2/ s3://saltconf2015-solution-2
+aws --profile william s3 sync --recursive /Users/wcannon/SaltConf2015/saltconf2015/s3_bucket_contents_solution_2/ s3://saltconf2015-solution-2
