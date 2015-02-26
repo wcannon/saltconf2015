@@ -149,13 +149,12 @@
 
 # Ping Master to ensure connection is alive (minutes).
 #ping_interval: 0
-ping_interval: 1
 
 # To auto recover minions if master changes IP address (DDNS)
-#    auth_tries: 10
-#    auth_safemode: False
-#    ping_interval: 90
-#    restart_on_error: True
+auth_tries: 20
+auth_safemode: False
+ping_interval: 90
+restart_on_error: True
 #
 # Minions won't know master is missing until a ping fails. After the ping fail,
 # the minion will attempt authentication and likely fails out and cause a restart.
