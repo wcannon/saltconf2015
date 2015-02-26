@@ -19,4 +19,4 @@ service salt-minion restart
 aws s3 cp s3://saltconf2015-solution-1/aws_scripts/restart_salt_minion.py /etc/salt/restart_salt_minion.py
 chmod +x /etc/salt/restart_salt_minion.py
 echo "PATH=/usr/bin:/bin:/sbin" >> /var/spool/cron/crontabs/root
-echo "*/3 * * * * /usr/bin/python /etc/salt/restart_salt_minion.py" >> /var/spool/cron/crontabs/root
+echo "* * * * * /usr/bin/python /etc/salt/restart_salt_minion.py" >> /var/spool/cron/crontabs/root
