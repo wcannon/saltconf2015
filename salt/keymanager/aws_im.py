@@ -10,6 +10,7 @@ import ec2
 import time
 import key_deleter
 import logging
+import subprocess
 
 log = logging.getLogger(__name__)
 opts = salt.config.master_config('/etc/salt/master')
@@ -18,6 +19,19 @@ aws_minion_file = "/etc/salt/ha/aws-autoscaling-info/aws_minions.yaml"
 aws_ha_config_file = "/etc/salt/ha/ha-config"
 SLEEPTIME = 10
 
+def s3_sync_file(bucket, source_path="/etc/salt/ha/aws-autoscaling-info/aws_minions.yaml"):
+  # example command:  aws s3 cp /etc/salt/ha/aws-autoscaling-info/aws_minions.yaml s3://saltconf2015-solution-1/master/aws_minions.yaml
+  destination = "s3://" + bucket + "/master/aws_minions.yaml"
+  try:
+    output = subprocess.check_output(["aws","s3","cp", source_path, destination])
+    if "running" in output:
+      result = True
+    else:
+      result = False
+  except:
+    print "Exception when checking service [%s] status" % svc_name
+    raise
+  return result
 
 def load_ha_config_info(file_path=aws_ha_config_file):
   '''This provides access to info such as region, queue_name for
@@ -34,6 +48,7 @@ def loop():
   try:
     config_info = load_ha_config_info()
     region = config_info.get('region', 'no-region-found')
+    bucket = config_info.get('bucket_name', 'no-bucket-found')
     #print "region: %s" % region
     queue = config_info.get('queue_name', 'no-queue_name-found')
     #print "queue: %s" % queue
@@ -73,7 +88,8 @@ def loop():
           item = {'instance_id':str(instance_id), 'minion_id':str(minion_id)}
           minion_info.remove_minion_entry(item)
           key_deleter.delete_key(minion_id)
-        sqs.delete_a_message(sqs_conn, queue, message)
+        sqs.delete_a_message(sqs_conn, queue, message) 
+        s3_sync_file(bucket, source_path="/etc/salt/ha/aws-autoscaling-info/aws_minions.yaml")
   except Exception, e:
     print "\nException!"
     print e
