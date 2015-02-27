@@ -19,6 +19,7 @@ git clone git@github.com:wcannon/saltconf2015.git
 
 Set up "permanent" s3 bucket, sns, sqs queues, and iam roles and profiles
 * Note: bucket name differences will require a slight change in commands below
+** Edit the cloud formation template before launching (S3 has global namespace, Use your dns name and etc)
 ---------------------------------------------
 cd into saltconf2015/cloudformation_templates (from git clone subdir)
 

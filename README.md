@@ -5,4 +5,6 @@ Two "high availability" solutions are provided.
 
 Each solution has an accompanying "how to" document.  
 
-All code / solutions is contained in this github repository.
+All code / solutions are contained in this github repository.
+
+NOTE:  This code is considered a prototype, but a great start.

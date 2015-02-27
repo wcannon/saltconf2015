@@ -19,6 +19,7 @@ git clone git@github.com:wcannon/saltconf2015.git
 
 Set up "permanent" s3 bucket and iam profiles
 * Note: bucket name differences will require a slight change in commands below
+** Edit the cloud formation template before launching (S3 has global namespace, Use your dns name and etc)
 ---------------------------------------------
 cd into saltconf2015/cloudformation_templates (from git clone subdir)
 
@@ -43,27 +44,8 @@ Create vpc and etc. with autoscaling group
 aws cloudformation create-stack --region us-west-2 --stack-name saltconf-vpc-singlemaster --template-body file:////home/wcannon/scratch/saltconf2015/cloudformation_templates/saltconf_vpc_singlemaster.json --parameters ParameterKey=KeyName,ParameterValue=autoscaling_test  ParameterKey=BucketName,ParameterValue=saltconf2015bucket ParameterKey=Region,ParameterValue=us-west-2 ParameterKey=SSHFrom,ParameterValue=50.137.210.143/32 ParameterKey=InstanceType,ParameterValue=m3.medium ParameterKey=InstanceProfile,ParameterValue=saltconf-s3-iam-S3SaltConf2015InstanceProfile-A1OO1PV80X44  
 
 While the instance spins up, and before it switches to using the elastic ip the bootstrap process can be watched:
+ssh to new server and ...
 tail -f /var/log/cloud-init-output.log 
-
-When lines occur (like below) the ec2 instance has associated itself with an elastic ip address:
-{
-    "AssociationId": "eipassoc-1c506a79"
-}
-
-
-TO DO Next:
-
-** Work completely separately using another account
-1.  bucket name / folder / must be set in master bootstrap for sync'ing the master and minion keys
-
-2.  salt master key push up to s3 if not there
-    salt master - pull down minion keys from s3
-3.  salt reactor for saving minion keys to s3 on key acceptance
-4.  add cname auto update to cloudformation - to make it easy for minions to find saltmaster
-5.  remove password from user creation in s3_iam cloudformation template - pass it in as a ParameterKey
-6.  run of highstate after accepting any key
-7.  easy way to assign grains to new servers
-
 
 
 # Create Stack Examples
