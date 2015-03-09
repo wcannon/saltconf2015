@@ -20,9 +20,8 @@ aws s3 cp s3://saltconf2015-solution-2/minion/webserver-grains /etc/salt/grains
 
 service salt-minion restart
 
-#aws s3 cp s3://saltconf2015-solution-2/aws_scripts/restart_salt_minion.py /etc/salt/restart_salt_minion.py
-#chmod +x /etc/salt/restart_salt_minion.py
-#echo "PATH=/usr/bin:/bin:/sbin" >> /var/spool/cron/crontabs/root
-#echo "* * * * * /usr/bin/python /etc/salt/restart_salt_minion.py" >> /var/spool/cron/crontabs/root
+aws s3 cp s3://saltconf2015-solution-2/aws_scripts/restart_bc_dns.py /etc/salt/restart_bc_dns.py
+chmod +x /etc/salt/restart_bc_dns.py
+echo "PATH=/usr/bin:/bin:/sbin" >> /var/spool/cron/crontabs/root
+echo "* * * * * /usr/bin/python /etc/salt/restart_bc_dns.py" >> /var/spool/cron/crontabs/root
 
-## Replace previous minion restart with conditional-dns-restart.py
