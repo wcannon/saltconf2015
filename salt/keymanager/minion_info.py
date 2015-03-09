@@ -67,30 +67,40 @@ def remove_minion_entry(item):
     log.error("Exception: %s" % e)
   return 
 
-def get_minion_id_by_instance_id(instance_id):
-  '''Lookup a minion_id by searching through the list of minions
-     Return the minion_id, or None if not found'''
-  minions = read_minion_file()
-  minion_id = None
-  for m in minions:
-    #print m
-    if m.get('instance_id', None) == instance_id:
-      minion_id = m.get('minion_id', None)
-      break
-  return minion_id 
+'''  not necessary '''
+#def get_minion_id_by_instance_id(instance_id):
+#  '''Lookup a minion_id by searching through the list of minions
+#     Return the minion_id, or None if not found'''
+#  minions = read_minion_file()
+#  minion_id = None
+#  for m in minions:
+#    #print m
+#    if m.get('instance_id', None) == instance_id:
+#      minion_id = m.get('minion_id', None)
+#      break
+#  return minion_id 
 
-def get_item_by_instance_id(instance_id):
-  '''Lookup a minion_id by searching through the list of minions
-     Return the minion_id, or None if not found'''
-  minions = read_minion_file()
-  minion = None
-  for m in minions:
-    #print m
-    if m.get('instance_id', None) == instance_id:
-      minion = m
-      break
-  return minion
+'''  not necessary '''
+#def get_item_by_instance_id(instance_id):
+#  '''Lookup a minion_id by searching through the list of minions
+#     Return the minion_id, or None if not found'''
+#  minions = read_minion_file()
+#  minion = None
+#  for m in minions:
+#    #print m
+#    if m.get('instance_id', None) == instance_id:
+#      minion = m
+#      break
+#  return minion
 
+def minion_exists_in_db(instance_id):
+  minions = read_minion_file()
+  result = False
+  for m in minions:
+    if m.get('instance_id', None) == instance_id:
+      result = True
+      break
+  return result
 
 if __name__ == "__main__":
   '''
@@ -119,7 +129,8 @@ if __name__ == "__main__":
   print
   print "Contents of minions file:"
   print print_minions()
-  print "One instance: %s" % get_item_by_instance_id('i-4e087261')
+  #print "One instance: %s" % get_item_by_instance_id('i-4e087261')
+  print "i-90511b7f exists in db file: %s" % minion_exists_in_db('i-90511b7f')
   
 
 

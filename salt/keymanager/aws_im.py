@@ -65,27 +65,28 @@ def loop():
       #sqs.print_message(message)
       if message:
         instance_id = msg.get_instance_id(message)
+        minion_id = instance_id
         #print "instance_id: %s" % instance_id
         action = msg.get_instance_action(message)
         #action = msg.get_body(message)
         #print "action: %s" % action
         #if action == "autoscaling::EC2_INSTANCE_LAUNCH":
         #if action.find("autoscaling::EC2_INSTANCE_LAUNCH") != -1:
-        ec2_conn = ec2.get_connection(region)
+        #ec2_conn = ec2.get_connection(region)
         if action and action.find("LAUNCH") != -1:
           #print "connecting to ec2"
-          minion_id = ec2.get_private_dns_name(ec2_conn, instance_id)
+          #minion_id = ec2.get_private_dns_name(ec2_conn, instance_id)
           #print "minion_id: %s" % minion_id
           item = {'instance_id':str(instance_id), 'minion_id':str(minion_id)}
           minion_info.add_minion_entry(item)
         #elif action == "autoscaling::ECW_INSTANCE_TERMINATE":
         #elif action == "autoscaling::ECW_INSTANCE_TERMINATE":
         elif action and action.find("TERMINATE") != -1:
-          minion_id = minion_info.get_minion_id_by_instance_id(instance_id) 
+          #minion_id = minion_info.get_minion_id_by_instance_id(instance_id) 
           #print "minion_id: %s" % minion_id
-          if not minion_id:  # did not exist in the minions file - try ec2
-            minion_id = ec2.get_private_dns_name(ec2_conn, instance_id)
-          item = {'instance_id':str(instance_id), 'minion_id':str(minion_id)}
+          #if not minion_id:  # did not exist in the minions file - try ec2
+          #  minion_id = ec2.get_private_dns_name(ec2_conn, instance_id)
+          item = {'minion_id':str(instance_id)}
           minion_info.remove_minion_entry(item)
           key_deleter.delete_key(minion_id)
         sqs.delete_a_message(sqs_conn, queue, message) 
