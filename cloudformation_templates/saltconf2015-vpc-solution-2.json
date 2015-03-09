@@ -376,6 +376,7 @@
           "apt-get upgrade -y\n",
           "apt-get install -y python-setuptools python-pip\n",
           "pip install --upgrade awscli\n",
+          "pip install --upgrade boto\n",
           "aws s3 cp s3://", {"Ref":"BucketName"}, "/aws_scripts/saltmaster_bootstrap.sh .\n",
           "chmod +x saltmaster_bootstrap.sh\n",
           "/bin/bash ./saltmaster_bootstrap.sh ", {"Ref":"Region"}, " ", "sol2-salt1.devopslogic.com", " ", {"Ref":"SQS1"}, " ", {"Ref":"BucketName"}, " ", {"Ref":"HostedZoneId"}, "\n"
@@ -432,6 +433,7 @@
           "apt-get upgrade -y\n",
           "apt-get install -y python-setuptools python-pip\n",
           "pip install --upgrade awscli\n",
+          "pip install --upgrade boto\n",
           "aws s3 cp s3://", {"Ref":"BucketName"}, "/aws_scripts/saltmaster_bootstrap.sh .\n",
           "chmod +x saltmaster_bootstrap.sh\n",
           "/bin/bash ./saltmaster_bootstrap.sh ", {"Ref":"Region"}, " ", "sol2-salt2.devopslogic.com", " ", {"Ref":"SQS2"}, " ", {"Ref":"BucketName"}, " ", {"Ref":"HostedZoneId"}, "\n"

@@ -44,7 +44,7 @@ echo "bucket_name: $bucketname" >> /etc/salt/ha/ha-config
 echo "hosted_zone_id: $hostedzoneid" >> /etc/salt/ha/ha-config
 
 # Check to see if our saltmaster.pem file exists by doing a simple ls on the expected location
-info=`aws s3 ls s3://saltconf2015-solution-1/master/master.pem 2>/dev/null`
+info=`aws s3 ls s3://saltconf2015-solution-2/master/master.pem 2>/dev/null`
 
 if [ $? -eq 0 ]
 then
@@ -52,23 +52,23 @@ then
   #echo $?
   #echo "found key in s3, downloading and restarting salt-master"
   service salt-master stop
-  aws s3 cp s3://saltconf2015-solution-1/master/master.pem /etc/salt/pki/master/master.pem
-  aws s3 cp s3://saltconf2015-solution-1/master/master.pub /etc/salt/pki/master/master.pub
+  aws s3 cp s3://saltconf2015-solution-2/master/master.pem /etc/salt/pki/master/master.pem
+  aws s3 cp s3://saltconf2015-solution-2/master/master.pub /etc/salt/pki/master/master.pub
   service salt-master start 
 else 
   ## key does not exist, upload our key as we are the first salt-master
   #echo $?
   #echo "key not found in s3, uploading master key to s3"
-  aws s3 cp /etc/salt/pki/master/master.pem s3://saltconf2015-solution-1/master/master.pem
-  aws s3 cp /etc/salt/pki/master/master.pub s3://saltconf2015-solution-1/master/master.pub
+  aws s3 cp /etc/salt/pki/master/master.pem s3://saltconf2015-solution-2/master/master.pem
+  aws s3 cp /etc/salt/pki/master/master.pub s3://saltconf2015-solution-2/master/master.pub
 fi
 
 
 # download master config file
-aws s3 cp s3://saltconf2015-solution-1/master/saltmaster_config  /etc/salt/master
+aws s3 cp s3://saltconf2015-solution-2/master/saltmaster_config  /etc/salt/master
 
 # download salt cloud config file
-aws s3 cp s3://saltconf2015-solution-1/master/ec2.conf  /etc/salt/cloud.providers.d/ec2.conf
+aws s3 cp s3://saltconf2015-solution-2/master/ec2.conf  /etc/salt/cloud.providers.d/ec2.conf
 
 # Need to git clone the repo locally so that a highstate can run on the salt-master
 git clone https://github.com/wcannon/saltconf2015.git  /root/saltconf2015
@@ -87,10 +87,10 @@ apt-get install -y salt-minion
 
 # download minion config file -- contains a 'master: 127.0.0.1 record' and other
 # necessary info
-aws s3 cp s3://saltconf2015-solution-1/master/saltmaster_minion_config  /etc/salt/minion
+aws s3 cp s3://saltconf2015-solution-2/master/saltmaster_minion_config  /etc/salt/minion
 
 # download grains file - contains info about self (e.g. administration role)
-aws s3 cp s3://saltconf2015-solution-1/master/saltmaster-grains  /etc/salt/grains
+aws s3 cp s3://saltconf2015-solution-2/master/saltmaster-grains  /etc/salt/grains
 
 service salt-minion restart
 
