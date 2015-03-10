@@ -42,6 +42,15 @@ def add_minion(instanceid):
     raise e
   return result
     
+def delete_minion(instanceid):
+  result = False
+  try:
+    minions = Table('minions')
+    result = minions.delete_item(instanceid=instanceid)
+  except Exception, e:
+    raise e
+  return result
+
 def get_minion(instanceid):
   result = False
   try:
@@ -91,7 +100,7 @@ if __name__ == "__main__":
   try:
     m = False
     print "\Adding a minion to minions table"
-    m = add_minion('i-123456')
+    m = add_minion('i-123456777')
   except Exception, e:
     print e
   print "m = %s" % m
@@ -113,3 +122,11 @@ if __name__ == "__main__":
   print "minions:"
   for m in minions:
     print m
+
+  try:
+    m = False
+    print "\Deleting minion from minions table"
+    m = delete_minion('i-123456')
+  except Exception, e:
+    print e
+  print "m = %s" % m
