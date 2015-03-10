@@ -51,6 +51,16 @@ def get_minion(instanceid):
     raise e
   return result
 
+def get_all_minions():
+  results = False
+  try:
+    minions = Table('minions')
+    results = minions.scan()
+  except Exception, e:
+    raise e
+  return results
+  
+
 if __name__ == "__main__":
   minions = False
   try:
@@ -92,4 +102,14 @@ if __name__ == "__main__":
     m = get_minion('i-123456')
   except Exception, e:
     print e
-  print "m = %s" % m.__dict__
+  print "m = %s" % m
+ 
+  try:
+    minions = False
+    print "\Retrieving all minions"
+    minions = get_all_minions()
+  except Exception, e:
+    print e
+  print "minions:"
+  for m in minions:
+    print m
