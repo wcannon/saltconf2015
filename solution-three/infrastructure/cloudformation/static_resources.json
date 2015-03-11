@@ -1,0 +1,308 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+
+  "Description" : "This CloudFormation template instantiates an S3 bucket, SNS, SQS queues, dynamodb tables, IAM roles/profiles and etc.  This ensures that the permanent data storage and transport is available",
+
+  "Parameters" : {
+
+    "BucketName" : {
+      "Description" : "Name of a new s3 bucket to create",
+      "Type" : "String",
+      "MinLength": "1",
+      "MaxLength": "128",
+      "AllowedPattern" : "[-_ a-zA-Z0-9]*",
+      "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores.",
+      "Default" : "saltconf2015-solution-3"
+    }
+
+  },
+
+  "Mappings" : {
+  },
+
+  "Resources" : {
+
+  "SqsMinion" :
+    {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+         "DelaySeconds": "0",
+         "QueueName": "SqsMinion"
+      }
+    },
+  "SqsMaster" :
+    {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+         "DelaySeconds": "0",
+         "QueueName": "SqsMaster"
+      }
+    },
+  "SqsPolicyMinion":{
+      "Type":"AWS::SQS::QueuePolicy",
+      "Properties":{        
+        "PolicyDocument":{
+          "Version":"2012-10-17",
+          "Id":"MyQueuePolicy",
+          "Statement":[
+            {
+              "Sid":"Allow-SendMessage-To-Minion-Queue-From-SNS-Topic",
+	      "Effect":"Allow",           
+	      "Principal":"*",
+ 	      "Action":["sqs:SendMessage"],
+	      "Resource":"*",
+              "Condition":{
+                "ArnEquals":{
+                  "aws:SourceArn":{"Ref":"SnsMinion"}
+                }
+              }
+            }
+          ]
+        },
+        "Queues":[{"Ref":"SqsMinion"}]
+      }
+  },
+  
+  "SqsPolicyMaster":{
+      "Type":"AWS::SQS::QueuePolicy",
+      "Properties":{        
+        "PolicyDocument":{
+          "Version":"2012-10-17",
+          "Id":"MyQueuePolicy",
+          "Statement":[
+            {
+              "Sid":"Allow-SendMessage-To-Master-Queue-From-SNS-Topic",
+	      "Effect":"Allow",           
+	      "Principal":"*",
+ 	      "Action":["sqs:SendMessage"],
+	      "Resource":"*",
+              "Condition":{
+                "ArnEquals":{
+                  "aws:SourceArn":{"Ref":"SnsMaster"}
+                }
+              }
+            }
+          ]
+        },
+        "Queues":[{"Ref":"SqsMaster"}]
+      }
+  },
+
+    "SnsMinion" : {
+       "Type" : "AWS::SNS::Topic",
+       "Properties" : {
+          "Subscription" : [
+             { "Endpoint" : { "Fn::GetAtt" : ["SqsMinion", "Arn"]}, "Protocol" : "sqs" }
+          ],
+          "TopicName" : "SnsMinion",
+          "DisplayName" : "SnsMinion"
+       }
+    },
+    
+    "SnsMaster" : {
+       "Type" : "AWS::SNS::Topic",
+       "Properties" : {
+          "Subscription" : [
+             { "Endpoint" : { "Fn::GetAtt" : ["SqsMaster", "Arn"]}, "Protocol" : "sqs" }
+          ],
+          "TopicName" : "SnsMaster",
+          "DisplayName" : "SnsMaster"
+       }
+    },
+
+   "S3Bucket": {
+     "Type" : "AWS::S3::Bucket",
+     "Properties" : {
+       "AccessControl" : "Private",
+       "BucketName" : { "Ref" : "BucketName"},
+       "Tags" : [ 
+                 { "Key" : "Purpose", "Value" :  "SaltConf2015-SolutionThree" }
+                ]
+      }
+    },
+
+  "RoleMaster": {
+         "Type": "AWS::IAM::Role",
+         "Properties": {
+            "AssumeRolePolicyDocument": {
+               "Version" : "2012-10-17",
+               "Statement": [ {
+                  "Effect": "Allow",
+                  "Principal": {
+                     "Service": [ "ec2.amazonaws.com" ]
+                  },
+                  "Action": [ "sts:AssumeRole" ]
+               } ]
+            },
+            "Path": "/",
+            "Policies": [ {
+               "PolicyName": "RoleMaster",
+               "PolicyDocument": {
+                  "Version" : "2012-10-17",
+                  "Statement": [ 
+                    {
+                    "Effect":"Allow",
+                    "Action": ["sqs:*"],
+                    "Resource": {"Fn::GetAtt": ["SqsMinion","Arn"] }
+                    },
+                    {
+                    "Effect":"Allow",
+                    "Action": ["sqs:*"],
+                    "Resource": {"Fn::GetAtt": ["SqsMaster","Arn"] }
+                    },
+                    {
+                    "Effect":"Allow",
+                    "Action": ["ec2:DescribeInstances","ec2:DescribeAddresses","ec2:DescribeInstanceStatus","ec2:DescribeNetworkInterfaces","ec2:DescribeTags"],
+                    "Resource": "*"
+                    },
+                    {
+                     "Effect": "Allow",
+                     "Action": "s3:*",
+                     "Resource": ["arn:aws:s3:::saltconf2015-solution-3",
+                                  "arn:aws:s3:::saltconf2015-solution-3/*"]
+                    },
+                    {"Effect": "Allow",
+                     "Action": "s3:ListAllMyBuckets",
+                     "Resource": "arn:aws:s3:::*"
+                    }
+                 ]
+               }
+               } ]
+            }
+   },
+   "InstanceProfileMaster": {
+         "Type": "AWS::IAM::InstanceProfile",
+         "Properties": {
+            "Path": "/",
+            "Roles": [ {
+               "Ref": "RoleMaster"
+            } ]
+         }
+   },
+
+  "S3GroupPolicyMaster" : {
+    "Type" : "AWS::IAM::Policy",
+    "Properties" : {
+      "Groups" : [ { "Ref" : "GroupMaster" } ],
+      "PolicyName" : "s3bucketpolicymaster",
+      "PolicyDocument" : {
+         "Version" : "2012-10-17",
+         "Statement": [ 
+          {
+            "Effect": "Allow",
+            "Action": [ "s3:*" ],
+            "Resource": ["arn:aws:s3:::saltconf2015-solution-3", "arn:aws:s3:::saltconf2015-solution-3/*"]
+          },
+          {"Effect": "Allow",
+            "Action": [ "s3:ListAllMyBuckets" ],
+            "Resource": "arn:aws:s3:::*"
+          }
+         ]
+      }
+   }
+  },
+  "GroupMaster": {
+    "Type" : "AWS::IAM::Group",
+    "Properties": {
+      "Path": "/"
+    }
+  },
+
+  "RoleMinion": {
+         "Type": "AWS::IAM::Role",
+         "Properties": {
+            "AssumeRolePolicyDocument": {
+               "Version" : "2012-10-17",
+               "Statement": [ {
+                  "Effect": "Allow",
+                  "Principal": {
+                     "Service": [ "ec2.amazonaws.com" ]
+                  },
+                  "Action": [ "sts:AssumeRole" ]
+               } ]
+            },
+            "Path": "/",
+            "Policies": [ {
+               "PolicyName": "RoleMinion",
+               "PolicyDocument": {
+                  "Version" : "2012-10-17",
+                  "Statement": [ 
+                    {
+                     "Effect": "Allow",
+                     "Action": "s3:*",
+                     "Resource": ["arn:aws:s3:::saltconf2015-solution-3/minion",
+                                  "arn:aws:s3:::saltconf2015-solution-3/minion/*"]
+                    },
+                    {"Effect": "Allow",
+                     "Action": "s3:ListAllMyBuckets",
+                     "Resource": "arn:aws:s3:::*"
+                    }
+                 ]
+               }
+               } ]
+            }
+   },
+   "InstanceProfileMinion": {
+         "Type": "AWS::IAM::InstanceProfile",
+         "Properties": {
+            "Path": "/",
+            "Roles": [ {
+               "Ref": "RoleMinion"
+            } ]
+         }
+   }
+
+},
+  
+  "Outputs" : {
+   "S3SaltConf2015Bucket" : {
+      "Value" : { "Fn::Join" : [
+         "", [ "https://", { "Fn::GetAtt" : [ "S3Bucket", "DomainName" ] } ]
+      ] },
+      "Description" : "Name of S3 bucket for saltconf 2015 solution 2"
+   },
+   "RoleMaster" : {
+      "Value" : { "Ref": "RoleMaster"},
+      "Description" : "Reference name of RoleMaster"
+   },
+   "RoleMasterArn" : {
+      "Value" :  {"Fn::GetAtt" : ["RoleMaster", "Arn"] },
+      "Description" : "AWS ARN of RoleMaster"
+   },
+   "InstanceProfileMaster" : {
+      "Value" : { "Ref" : "InstanceProfileMaster"},
+      "Description" : "Reference name of InstanceProfileMaster"
+   },
+   "InstanceArnMaster" : {
+      "Value" :  {"Fn::GetAtt" : ["InstanceProfileMaster", "Arn"] },
+      "Description" : "AWS ARN of InstanceProfileMaster"
+   },
+   "InstanceProfileMinion" : {
+      "Value" : { "Ref" : "InstanceProfileMinion"},
+      "Description" : "Reference name of IstanceProfileMinion"
+   },
+   "MinionQueueURL" : {
+      "Description" : "URL of minion sqs queue",
+      "Value" : { "Ref" : "SqsMinion" }
+     },
+   "MinionQueueARN" : {
+      "Description" : "ARN of newly created sqs queue",
+      "Value" : { "Fn::GetAtt" : [ "SqsMinion", "Arn"] }
+     },
+   "MasterQueueURL" : {
+      "Description" : "URL of master sqs queue",
+      "Value" : { "Ref" : "SqsMaster" }
+     },
+   "MasterQueueARN" : {
+      "Description" : "ARN of newly created sqs queue",
+      "Value" : { "Fn::GetAtt" : [ "SqsMaster", "Arn"] }
+     },
+    "MasterSNSTopicARN":{
+      "Value":{"Ref":"SnsMaster"}  
+    },
+    "MinionySNSTopicARN":{
+      "Value":{"Ref":"SnsMinion"}  
+    }
+ } 
+
+}
