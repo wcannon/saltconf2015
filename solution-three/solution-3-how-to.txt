@@ -1,0 +1,95 @@
+General Steps:
+
+-----------------
+Overall design goal:
+-----------------
+Create a self-healing / self-managing environment for salt-masters and salt-minions.  If a salt-master is created / terminated the minions configuration files should be updated, with a salt-minion restart.  If a new minion is created / terminated all salt-masters should accept the minion key of the new minion, and a high-state should be run on the minion.
+
+-----------------
+What is being used?
+-----------------
+A combination of AWS services and custom software makes this possible.  Wherever possible AWS services have been used.  The remaining gaps are filled by custom software.  
+
+AWS services used:
+S3 [saltmaster keys, bootstrap scripts, ssh key pairs for placement on masters / minions]
+DynamoDB [state for masters / minions is contained here]
+IAM [roles / profiles for ec2 instances, s3, dynamodb]
+VPC / EC2 [general infrastructure, instances]
+SNS [autoscaling notifications]
+SQS [queues to hold autoscaling notifications]
+
+Custom code:
+master_manager.py (run as ubuntu startup script)
+minion_manager.py (run as ubuntu startup script)
+saltstack reactors - key_manager.py, highstate_manager.py
+
+-----------------
+Pre-Reqs:
+-----------------
+Tested only with ubuntu 14.04 LTS server (and client for laptop awscli)
+AWS root account
+Create ssh keypair in AWS ec2 consle, download and have accessible private Keyname
+Install awscli tools (e.g. pip install awscli)
+
+
+-----------------
+On laptop/desktop
+-----------------
+clone github repo
+git clone git@github.com:wcannon/saltconf2015.git
+
+Set up aws credentials (either with the new user info created in from cloudformation template saltconf_s3_iam.json or another account with permissions)
+----------------------
+aws configure
+
+Set up "permanent" s3 bucket and iam profiles
+* Note: bucket name differences will require a slight change in commands below
+** Edit the cloud formation template before launching (S3 has global namespace, and etc)
+---------------------------------------------
+cd into saltconf2015/cloudformation_templates (from git clone subdir)
+
+Example cloudformation template usage:
+##  aws --profile william cloudformation create-stack --region us-east-1 --stack-name saltconf2015-s3-solution-2  --template-body file:////home/wcannon/saltconf2015/saltconf2015/cloudformation_templates/saltconf2015-s3-iam-solution-2.json --capabilities CAPABILITY_IAM
+
+aws --profile william cloudformation create-stack --region us-east-1 --stack-name saltconf2015-s3-solution-3  --template-body file:////home/wcannon/saltconf2015/saltconf2015/solution-three/infrastructure/cloudformation/s3-iam-solution.json --capabilities CAPABILITY_IAM
+
+** output values of cloudformation are needed as inputs to second cloudformation template - available through aws console, or cli
+
+Put necessary scripts and resource dirs in new s3 bucket (example for my s3 bucket named saltconf2015bucket)
+
+Example s3 sync usage:
+aws s3 sync --recursive s3_bucket_contents/ s3://saltconf2015bucket
+
+Set up initial DynamoDB tables:
+--------------------------------------------
+Run the dynamodb_tables.py setup script
+
+
+Create vpc and etc. with autoscaling group
+---------------------------------------------
+Example cloudformation template usage:
+aws cloudformation create-stack --region us-west-2 --stack-name saltconf-vpc-singlemaster --template-body file:////home/wcannon/scratch/saltconf2015/cloudformation_templates/saltconf_vpc_singlemaster.json --parameters ParameterKey=KeyName,ParameterValue=autoscaling_test  ParameterKey=BucketName,ParameterValue=saltconf2015bucket ParameterKey=Region,ParameterValue=us-west-2 ParameterKey=SSHFrom,ParameterValue=50.137.210.143/32 ParameterKey=InstanceType,ParameterValue=m3.medium ParameterKey=InstanceProfile,ParameterValue=saltconf-s3-iam-S3SaltConf2015InstanceProfile-A1OO1PV80X44  
+
+Convenient way to watch / debug UserData / bootstrap scripts:
+---------------------------------------------
+While the instances spins up, and before it switches to using the elastic ip the bootstrap process can be watched:
+ssh to new server and ...
+tail -f /var/log/cloud-init-output.log 
+
+
+
+-----------------------------------------------
+What now?
+-----------------------------------------------
+Retrieve your saltmaster public dns names either through aws console or cli
+SSH into your saltmasters and make the environment work as needed using saltstack.
+Observe all AWS components using aws console or cli
+
+
+aws --profile william cloudformation create-stack --region us-east-1 --stack-name project1-static-resources  --template-body file:////home/wcannon/saltconf2015/saltconf2015/solution-three/infrastructure/cloudformation/static_resources.json --capabilities CAPABILITY_IAM
+
+aws --profile william cloudformation update-stack --region us-east-1 --stack-name project1-static-resources  --template-body file:////home/wcannon/saltconf2015/saltconf2015/solution-three/infrastructure/cloudformation/static_resources.json --capabilities CAPABILITY_IAM
+
+aws --profile william cloudformation create-stack --region us-east-1 --stack-name project1-dynamic-resources --template-body file:////home/wcannon/saltconf2015/saltconf2015/solution-three/infrastructure/cloudformation/dynamic_resources.json --parameters ParameterKey=KeyName,ParameterValue=saltconf2015  ParameterKey=BucketName,ParameterValue=saltconf2015-solution-3 ParameterKey=Region,ParameterValue=us-east-1 ParameterKey=SSHFrom,ParameterValue=76.17.160.221/32 ParameterKey=InstanceType,ParameterValue=m3.medium ParameterKey=InstanceProfileMinion,ParameterValue=project1-static-resources-InstanceProfileMinion-19LH8LSLBI1PI ParameterKey=InstanceProfileMaster,ParameterValue=project1-static-resources-InstanceProfileMaster-1WYE1X6GGCCZ5
+
+aws --profile william cloudformation update-stack --region us-east-1 --stack-name project1-dynamic-resources --template-body file:////home/wcannon/saltconf2015/saltconf2015/solution-three/infrastructure/cloudformation/dynamic_resources.json --parameters ParameterKey=KeyName,ParameterValue=saltconf2015  ParameterKey=BucketName,ParameterValue=saltconf2015-solution-3 ParameterKey=Region,ParameterValue=us-east-1 ParameterKey=SSHFrom,ParameterValue=76.17.160.221/32 ParameterKey=InstanceType,ParameterValue=m3.medium ParameterKey=InstanceProfileMinion,ParameterValue=project1-static-resources-InstanceProfileMinion-19LH8LSLBI1PI ParameterKey=InstanceProfileMaster,ParameterValue=project1-static-resources-InstanceProfileMaster-1WYE1X6GGCCZ5
