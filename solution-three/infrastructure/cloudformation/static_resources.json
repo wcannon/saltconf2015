@@ -22,6 +22,83 @@
 
   "Resources" : {
 
+   "DynamoDBTableMinion" : {
+      "Type" : "AWS::DynamoDB::Table",
+      "Properties" : {
+        "TableName" : "minions",
+        "AttributeDefinitions" : [
+          {
+            "AttributeName" : "instanceid",
+            "AttributeType" : "S"   
+          },
+          {
+            "AttributeName" : "updatetime",
+            "AttributeType" : "N"   
+          },
+          {
+            "AttributeName" : "region",
+            "AttributeType" : "S"   
+          },
+          {
+            "AttributeName" : "status",
+            "AttributeType" : "S"
+          },
+          {
+            "AttributeName" : "highstate_run_once",
+            "AttributeType" : "S"
+          },
+          {
+            "AttributeName" : "highstate_runner",
+            "AttributeType" : "S"
+          }
+        ],
+        "KeySchema" : [
+          {
+            "AttributeName" : "instanceid",
+            "KeyType" : "HASH"
+          }
+        ],
+        "ProvisionedThroughput" : {
+          "ReadCapacityUnits" : "1",
+          "WriteCapacityUnits" : "1"
+        }
+      }
+    }, 
+   "DynamoDBTableMaster" : {
+      "Type" : "AWS::DynamoDB::Table",
+      "Properties" : {
+        "TableName" : "minions",
+        "AttributeDefinitions" : [
+          {
+            "AttributeName" : "instanceid",
+            "AttributeType" : "S"
+          },
+          {
+            "AttributeName" : "updatetime",
+            "AttributeType" : "N"   
+          },
+          {
+            "AttributeName" : "region",
+            "AttributeType" : "S"
+          },
+          {
+            "AttributeName" : "ipaddress",
+            "AttributeType" : "S"
+          }
+        ],
+        "KeySchema" : [
+          {
+            "AttributeName" : "instanceid",
+            "KeyType" : "HASH"
+          }
+        ],
+        "ProvisionedThroughput" : {
+          "ReadCapacityUnits" : "1",
+          "WriteCapacityUnits" : "1"
+        }
+      }       
+    }, 
+
   "SqsMinion" :
     {
       "Type": "AWS::SQS::Queue",
