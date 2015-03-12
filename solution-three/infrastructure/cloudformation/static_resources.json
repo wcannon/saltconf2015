@@ -25,31 +25,10 @@
    "DynamoDBTableMinion" : {
       "Type" : "AWS::DynamoDB::Table",
       "Properties" : {
-        "TableName" : "minions",
         "AttributeDefinitions" : [
           {
             "AttributeName" : "instanceid",
             "AttributeType" : "S"   
-          },
-          {
-            "AttributeName" : "updatetime",
-            "AttributeType" : "N"   
-          },
-          {
-            "AttributeName" : "region",
-            "AttributeType" : "S"   
-          },
-          {
-            "AttributeName" : "status",
-            "AttributeType" : "S"
-          },
-          {
-            "AttributeName" : "highstate_run_once",
-            "AttributeType" : "S"
-          },
-          {
-            "AttributeName" : "highstate_runner",
-            "AttributeType" : "S"
           }
         ],
         "KeySchema" : [
@@ -61,28 +40,16 @@
         "ProvisionedThroughput" : {
           "ReadCapacityUnits" : "1",
           "WriteCapacityUnits" : "1"
-        }
+        },
+        "TableName" : "minions"
       }
     }, 
    "DynamoDBTableMaster" : {
       "Type" : "AWS::DynamoDB::Table",
       "Properties" : {
-        "TableName" : "minions",
         "AttributeDefinitions" : [
           {
             "AttributeName" : "instanceid",
-            "AttributeType" : "S"
-          },
-          {
-            "AttributeName" : "updatetime",
-            "AttributeType" : "N"   
-          },
-          {
-            "AttributeName" : "region",
-            "AttributeType" : "S"
-          },
-          {
-            "AttributeName" : "ipaddress",
             "AttributeType" : "S"
           }
         ],
@@ -95,7 +62,8 @@
         "ProvisionedThroughput" : {
           "ReadCapacityUnits" : "1",
           "WriteCapacityUnits" : "1"
-        }
+        },
+        "TableName" : "masters"
       }       
     }, 
 
@@ -241,6 +209,11 @@
                     {"Effect": "Allow",
                      "Action": "s3:ListAllMyBuckets",
                      "Resource": "arn:aws:s3:::*"
+                    },
+                    {
+                     "Effect":"Allow",
+                     "Action":"dynamodb:*",
+                     "Resource":"*"
                     }
                  ]
                }
@@ -313,6 +286,14 @@
                     {"Effect": "Allow",
                      "Action": "s3:ListAllMyBuckets",
                      "Resource": "arn:aws:s3:::*"
+                    },
+                    {
+                     "Effect": "Allow",
+                     "Action": [
+                     "dynamodb:GetItem",
+                     "dynamodb:BatchGetItem"
+                     ],
+                     "Resource": "*"
                     }
                  ]
                }
