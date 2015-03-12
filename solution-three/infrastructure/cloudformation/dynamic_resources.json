@@ -369,7 +369,7 @@
       "BlockDeviceMappings" : [
          {
            "DeviceName" : "/dev/sda1",
-           "Ebs" : { "VolumeSize" : "15", "VolumeType" : "io1", "Iops" : 200 } 
+           "Ebs" : { "VolumeSize" : "20", "VolumeType" : "io1", "Iops" : 200 } 
          }
       ],
       "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
@@ -379,9 +379,9 @@
           "apt-get install -y python-setuptools python-pip\n",
           "pip install --upgrade awscli\n",
           "pip install --upgrade boto\n",
-          "aws s3 cp s3://", {"Ref":"BucketName"}, "/master/scripts/saltmaster_bootstrap.sh .\n",
+          "aws s3 cp s3://", {"Ref":"BucketName"}, "/master/scripts/saltmaster_bootstrap.sh . \n",
           "chmod +x saltmaster_bootstrap.sh\n",
-          "/bin/bash ./saltmaster_bootstrap.sh ", {"Ref":"Region"}, " ",  {"Ref":"QueueMinion"}, " ", {"Ref":"QueueMaster"}, " ", {"Ref":"BucketName"},  "\n"
+          "/bin/bash ./saltmaster_bootstrap.sh ", {"Ref":"Region"}, " ",  {"Ref":"QueueMinion"}, " ", {"Ref":"QueueMaster"}, " ", {"Ref":"BucketName"}, " saltmaster",   "\n"
         ]]}}
    }
  },
@@ -428,7 +428,7 @@
       "BlockDeviceMappings" : [
          {
            "DeviceName" : "/dev/sda1",
-           "Ebs" : { "VolumeSize" : "16", "VolumeType" : "io1", "Iops" : 200 } 
+           "Ebs" : { "VolumeSize" : "19", "VolumeType" : "io1", "Iops" : 200 } 
          }
       ],
       "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
@@ -437,9 +437,9 @@
           "apt-get upgrade -y\n",
           "apt-get install -y python-setuptools python-pip\n",
           "pip install --upgrade awscli\n",
-          "aws s3 cp s3://", {"Ref":"BucketName"}, "/minion/scripts/saltminion_bootstrap.sh .\n",
-          "chmod +x saltminion_bootstrap.sh\n",
-          "/bin/bash ./saltminion_bootstrap.sh\n"
+          "aws s3 cp s3://", {"Ref":"BucketName"}, "/minion/scripts/saltminion_bootstrap.py . \n",
+          "chmod +x saltminion_bootstrap.py\n",
+          "/usr/bin/python ./saltminion_bootstrap.py", " ", {"Ref":"BucketName"}, " webserver",  "\n"
         ]]}}
    }
  },
