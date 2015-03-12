@@ -10,7 +10,7 @@
       "Type" : "String",
       "MinLength": "1",
       "MaxLength": "128",
-      "Default" : "arn:aws:sns:us-east-1:012800249358:SolutionTwoInstanceManagement"
+      "Default" : ""
     },
 
     "SnsMinion" : {
@@ -18,7 +18,7 @@
       "Type" : "String",
       "MinLength": "1",
       "MaxLength": "128",
-      "Default" : "arn:aws:sns:us-east-1:012800249358:SolutionTwoInstanceManagement"
+      "Default" : ""
     },
 
     "QueueMinion" : {
@@ -73,13 +73,13 @@
     "InstanceProfileMaster" : {
       "Description" : "The IAM instance profile to use for SaltMasters - S3, SQS",
       "Type" : "String",
-      "Default" : "saltconf2015-s3-solution-2-S3SaltConf2015InstanceProfile-BUFVXHSZ82JY"
+      "Default" : ""
     },
 
     "InstanceProfileMinion" : {
       "Description" : "The IAM instance profile for SaltMinions - S3",
       "Type" : "String",
-      "Default" : "saltconf2015-s3-solution-2-S3SaltConf2015MinionInstanceProfile-7PG8FIWWNV84"
+      "Default" : ""
     },
 
     "BucketName" : {
@@ -89,7 +89,7 @@
       "MaxLength": "128",
       "AllowedPattern" : "[-_ a-zA-Z0-9]*",
       "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores.",
-      "Default" : "saltconf2015-solution-2"
+      "Default" : ""
     }
 
   },
@@ -379,7 +379,7 @@
           "apt-get install -y python-setuptools python-pip\n",
           "pip install --upgrade awscli\n",
           "pip install --upgrade boto\n",
-          "aws s3 cp s3://", {"Ref":"BucketName"}, "/aws_scripts/saltmaster_bootstrap.sh .\n",
+          "aws s3 cp s3://", {"Ref":"BucketName"}, "/master/scripts/saltmaster_bootstrap.sh .\n",
           "chmod +x saltmaster_bootstrap.sh\n",
           "/bin/bash ./saltmaster_bootstrap.sh ", {"Ref":"Region"}, " ",  {"Ref":"QueueMinion"}, " ", {"Ref":"QueueMaster"}, " ", {"Ref":"BucketName"},  "\n"
         ]]}}
@@ -437,7 +437,7 @@
           "apt-get upgrade -y\n",
           "apt-get install -y python-setuptools python-pip\n",
           "pip install --upgrade awscli\n",
-          "aws s3 cp s3://", {"Ref":"BucketName"}, "/aws_scripts/saltminion_bootstrap.sh .\n",
+          "aws s3 cp s3://", {"Ref":"BucketName"}, "/minion/scripts/saltminion_bootstrap.sh .\n",
           "chmod +x saltminion_bootstrap.sh\n",
           "/bin/bash ./saltminion_bootstrap.sh\n"
         ]]}}
