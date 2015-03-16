@@ -54,8 +54,8 @@ def main(bucket_name, grains_file):
   try:
     for cmd_as_list in commands:
       # simply allowing an easy substitution for the bucket name
-      updated_cmd_as_list = run_substitions(cmd_as_list, 'BUCKET', bucket_name)
-      updated_cmd_as_list = run_substitions(updated_cmd_as_list, 'GRAINS_FILE', grains_file)
+      updated_cmd_as_list = run_substitutions(cmd_as_list, 'BUCKET', bucket_name)
+      updated_cmd_as_list = run_substitutions(updated_cmd_as_list, 'GRAINS_FILE', grains_file)
       output = run_command(updated_cmd_as_list)
   except Exception, e:
     print "Error: %s" % output

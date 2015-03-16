@@ -10,7 +10,7 @@
       "Type" : "String",
       "MinLength": "1",
       "MaxLength": "128",
-      "Default" : ""
+      "Default" : "arn:aws:sns:us-east-1:012800249358:SnsMaster"
     },
 
     "SnsMinion" : {
@@ -18,7 +18,7 @@
       "Type" : "String",
       "MinLength": "1",
       "MaxLength": "128",
-      "Default" : ""
+      "Default" : "arn:aws:sns:us-east-1:012800249358:SnsMinion"
     },
 
     "QueueMinion" : {
@@ -73,13 +73,13 @@
     "InstanceProfileMaster" : {
       "Description" : "The IAM instance profile to use for SaltMasters - S3, SQS",
       "Type" : "String",
-      "Default" : ""
+      "Default" : "project1-static-resources-InstanceProfileMaster-INE9ATQ2OFFP"
     },
 
     "InstanceProfileMinion" : {
       "Description" : "The IAM instance profile for SaltMinions - S3",
       "Type" : "String",
-      "Default" : ""
+      "Default" : "project1-static-resources-InstanceProfileMinion-1L9KD571JXQNE"
     },
 
     "BucketName" : {
@@ -89,7 +89,7 @@
       "MaxLength": "128",
       "AllowedPattern" : "[-_ a-zA-Z0-9]*",
       "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores.",
-      "Default" : ""
+      "Default" : "saltconf2015-solution-3"
     }
 
   },
@@ -398,7 +398,8 @@
         "NotificationTypes" : [ "autoscaling:EC2_INSTANCE_LAUNCH", "autoscaling:EC2_INSTANCE_TERMINATE" ] }, 
       "Tags" : [ 
                 { "Key" : "stack_name", "Value" : { "Ref" : "AWS::StackName" }, "PropagateAtLaunch":"true" },
-                { "Key" : "region", "Value" : { "Ref" : "Region" }, "PropagateAtLaunch":"true"  }
+                { "Key" : "region", "Value" : { "Ref" : "Region" }, "PropagateAtLaunch":"true"  },
+                { "Key" : "Name", "Value" : "SaltMaster", "PropagateAtLaunch":"true"  }
                ],
       "VPCZoneIdentifier" : [
          { "Ref" : "AZ1AdminSubnet"} 
@@ -456,6 +457,7 @@
                    { "TopicARN" : { "Ref" : "SnsMinion" },
                      "NotificationTypes" : [ "autoscaling:EC2_INSTANCE_LAUNCH", "autoscaling:EC2_INSTANCE_TERMINATE" ] }, 
                "Tags" : [ { "Key" : "stack_name", "Value" : { "Ref" : "AWS::StackName" }, "PropagateAtLaunch":"true" },
+                          { "Key" : "Name", "Value" : "Minion", "PropagateAtLaunch":"true"  },
                           { "Key" : "region", "Value" : { "Ref" : "Region" }, "PropagateAtLaunch":"true"  } ],
                "VPCZoneIdentifier" : [ { "Ref" : "AZ1AdminSubnet"}, { "Ref" : "AZ2AdminSubnet"} ] 
       } 
