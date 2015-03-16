@@ -33,7 +33,7 @@ echo "queuename_master: $queuename_master" >> /etc/salt/ha/ha-config
 
 # Check to see if our saltmaster.pem file exists by doing a simple ls on the expected location
 # If not, we are the first saltmster, and will push our keys into the bucket
-info=`aws s3 ls s3://saltconf2015-solution-2/master/master.pem 2>/dev/null`
+info=`aws s3 ls s3://saltconf2015-solution-3/master/master.pem 2>/dev/null`
 
 if [ $? -eq 0 ]
 then
