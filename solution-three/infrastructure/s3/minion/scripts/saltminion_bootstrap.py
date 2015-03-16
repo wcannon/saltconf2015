@@ -11,7 +11,7 @@ commands = [
 	  	['add-apt-repository', '-y', 'ppa:saltstack/salt'],
                 ['apt-get', 'update'],
                 ['apt-get', 'install', '-y', 'salt-minion', 'python-requests'],
-                ['aws', 's3', 'cp', 's3://BUCKET/minion/minion_config', '/etc/salt/minion'],
+                ['aws', 's3', 'cp', 's3://BUCKET/minion/config/minion_config', '/etc/salt/minion'],
                 ['aws', 's3', 'cp', 's3://BUCKET/minion/master_list_manager.py', '/usr/bin/'],
                 ['aws', 's3', 'cp', 's3://BUCKET/minion/master_list_manager.conf', '/etc/init/'],
                 ['aws', 's3', 'cp', 's3://BUCKET/minion/GRAINS_FILE', '/etc/salt/grains'],

@@ -587,7 +587,3 @@ ping_interval: 1
 ############################################
 # Location of the repository cache file on the master:
 #win_repo_cachefile: 'salt://win/repo/winrepo.p'
-
-master:
-  - sol2-salt1.devopslogic.com
-  - sol2-salt2.devopslogic.com

@@ -54,7 +54,7 @@ fi
 git clone https://github.com/wcannon/saltconf2015.git  /root/saltconf2015
 
 # Copy in master config
-cp /root/saltconf2015/solution-three/salt/master/master /etc/salt/master
+aws s3 cp s3://saltconf2015-solution-3/master/config/saltmaster_config /etc/salt/master
 
 # create symlinks
 ln -s /root/saltconf2015/solution-three/pillar /srv/pillar
