@@ -71,7 +71,7 @@ service salt-master restart
 
 ## Instead of installing salt-minion & etc, we download the minion bootstrap
 ## and run it passing in params just like any minion receives
-s3 cp s3://$bucketname/minion/scripts/saltminion_bootstrap.py .
+aws s3 cp s3://$bucketname/minion/scripts/saltminion_bootstrap.py .
 chmod +x saltminion_bootstrap.py
 /usr/bin/python ./saltminion_bootstrap.py $bucketname $grainsfile
 
