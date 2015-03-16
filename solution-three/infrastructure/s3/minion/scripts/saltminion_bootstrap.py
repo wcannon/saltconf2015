@@ -14,7 +14,7 @@ commands = [
                 ['aws', 's3', 'cp', 's3://BUCKET/minion/config/minion_config', '/etc/salt/minion'],
                 ['aws', 's3', 'cp', 's3://BUCKET/minion/scripts/master_list_manager.py', '/usr/bin/'],
                 ['aws', 's3', 'cp', 's3://BUCKET/minion/scripts/master_list_manager.conf', '/etc/init/'],
-                ['aws', 's3', 'cp', 's3://BUCKET/minion/GRAINS_FILE', '/etc/salt/grains'],
+                ['aws', 's3', 'cp', 's3://BUCKET/minion/grains_files/GRAINS_FILE', '/etc/salt/grains'],
                 ['service', 'master_list_manager', 'start'],
            ]
 
