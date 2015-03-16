@@ -60,7 +60,7 @@ aws s3 cp s3://saltconf2015-solution-3/master/config/saltmaster_config /etc/salt
 ln -s /root/saltconf2015/solution-three/pillar /srv/pillar
 ln -s /root/saltconf2015/solution-three/reactor /srv/reactor
 ln -s /root/saltconf2015/solution-three/salt /srv/salt
-ln -s /root/saltconf2015/solution-three/runners /srv/salt/runners
+ln -s /root/saltconf2015/solution-three/salt/runners /srv/salt/runners
 
 # restart salt-master to pick up any master config file changes
 service salt-master restart
