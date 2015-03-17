@@ -1,14 +1,35 @@
 # saltconf2015
 Open Source code for my SaltConf 2015 Talk
 
-Two "high availability" solutions are provided.
+There is now one solution (solution three) aka Phoenix. 
 
-Update:  This week I'm changing a lot of this code.  I'll be moving the minion_db file to dynamodb.  I'll also stop relying on dns for minions to find the masters.  This will also now be captured in dynamodb.  
+In this project every salt-master runs a salt-minion.
 
-To summarize:  the various solutions are being combined into one solution - solution three.  The number of salt masters will vary by changing the cloudformation template launch group for salt masters.  
+AutoScaling groups launch new masters and minions as needed.  
 
-The masters list will now be dynamic, not relying on fixed number of dns names.  Minions will detect a change in the masters list in, update their own config, and restart the salt-minion service.
+The salt masters list and salt minions list are now fully dynamic, with data about both stored in dynamodb.
+
+Minions monitor the list of masters in dynamodb, updating their own config file with the masters list if it does not match those found in dynamodb, followed by a restart of the salt-minion service.
 
 The masters will now keep track of minion highstate status using a dynamodb table, including which master gets to run the highstate on a minion.
 
-Solution three allows for a variable number of masters (1 - X), and a variable number of minions.  In addition new masters will be automatically added to minions, whereas retired masters will be automatically removed from minions.  
+Amazon AWS services used:
+CloudFormation
+S3
+SNS
+SQS
+Dynamodb
+AutoScaling
+VPC + subnets, security groups and etc.
+
+Minion Key Management is done by:
+Custom Salt-Runner
+
+Minion highstate is done by:
+Custom Salt-Runner
+
+Instance/Minion list in dynamodb managed by:
+Custom Code - instance_manager.py
+
+Master list updated on minions managed by:
+Custom Code - master_list_manager.py
