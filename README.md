@@ -14,6 +14,7 @@ The masters will now keep track of minion highstate status using a dynamodb tabl
 
 Amazon AWS services used:
 CloudFormation
+IAM
 S3
 SNS
 SQS
@@ -22,10 +23,10 @@ AutoScaling
 VPC + subnets, security groups and etc.
 
 Minion Key Management is done by:
-Custom Salt-Runner
+Salt Reactor and Custom Salt-Runner key_manager.py
 
 Minion highstate is done by:
-Custom Salt-Runner
+Salt Reactor and Custom Salt-Runner highstate_manager.py
 
 Instance/Minion list in dynamodb managed by:
 Custom Code - instance_manager.py
