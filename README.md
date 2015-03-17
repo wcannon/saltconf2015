@@ -1,7 +1,6 @@
-# saltconf2015
-Open Source code for my SaltConf 2015 Talk
+# Phoenix
 
-There is now one solution (solution three) aka Phoenix. 
+There is now one solution (solution three) aka The Phoenix. 
 
 In this project every salt-master runs a salt-minion.
 
