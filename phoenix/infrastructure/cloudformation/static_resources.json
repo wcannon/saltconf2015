@@ -288,19 +288,9 @@
                      "Resource": "arn:aws:s3:::*"
                     },
                     {
-                     "Effect": "Allow",
-                     "Action": [
-                     "dynamodb:GetItem",
-                     "dynamodb:BatchGetItem",
-                     "dynamodb:DescribeTable",
-                     "dynamodb:Scan",
-                     "dynamodb:PutItem",
-                     "dynamodb:UpdateItem",
-                     "dynamodb:DeleteItem",
-                     "dynamodb:ListTables",
-                     "dynamodb:Query"
-                     ],
-                     "Resource": "*"
+                     "Effect":"Allow",
+                     "Action":"dynamodb:*",
+                     "Resource":"*"
                     }
                  ]
                }
