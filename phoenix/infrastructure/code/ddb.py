@@ -1,8 +1,17 @@
 #!/usr/bin/env python
 from datetime import datetime
-from dynamodb_mapper.model import DynamoDBModel, utc_tz
+from dynamodb_mapper.model import DynamoDBModel, utc_tz, ConnectionBorg
 
 #http://dynamodb-mapper.readthedocs.org/en/latest/api/model.html#data-models
+def set_region(region_name):
+  try:
+    cbi = ConnectionBorg()
+    cbi.set_region(region_name)
+  except Exception, e:
+    print "Problem changing regions for dynamodb connection"
+    raise
+  return
+
 class MinionInstance(DynamoDBModel):
   __table__ = u"minions"
   __hash_key__ = u"instanceid"
