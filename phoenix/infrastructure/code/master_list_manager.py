@@ -2,10 +2,11 @@
 import sys
 import yaml
 import time
+import helper
 import subprocess
-from ddb import MasterInstance
+import ddb
 
-POLLCYCLE = 60 # seconds to sleep between polling dynamodb for list of active salt masters
+POLL_CYCLE = 60 # seconds to sleep between polling dynamodb for list of active salt masters
 CONFIG_FILE = "/etc/salt/minion"
 TABLE_NAME = "masters"
 SVC_NAME = "salt-minion"
@@ -24,7 +25,7 @@ def get_active_salt_masters():
   '''retrieve and return the list of active salt masters from dynamodb'''
   master_ipaddrs = []
   try:
-    a = MasterInstance()
+    a = ddb.MasterInstance()
     masters = a.scan()
     for m in masters:
       if m.active == True:
@@ -49,37 +50,37 @@ def restart_local_minion():
   result = False
   try:
     output = subprocess.check_output(["/usr/sbin/service", SVC_NAME, "restart"])
-    print "restarting service - %s" % svc_name
+    print "restarting service - %s" % SVC_NAME
   except:
-    print "Exception when restarting service [%s] status" % svc_name
+    print "Exception when restarting service [%s] status" % SVC_NAME
     raise
   return
 
 def main():
   try:
+    region = helper.get_region()
+    print "zone is: %s" % region
+    ddb.set_region(region)
     local_sm_list = get_current_salt_masters()
+    print "local_sm_list is: %s" % local_sm_list
   except Exception, e:
     print "Unable to get current salt masters from minion config"
     print e
     raise
+  # need to set the dynamodb region to connect to here --> region 
+  
   dynamodb_sm_list = get_active_salt_masters()
+  print "dynamodb_sm_list is: %s" % dynamodb_sm_list
   if local_sm_list != dynamodb_sm_list: # are lists unequal
+    print "lists don't match...updating config and restarting minion"
     update_config(masters_list=dynamodb_sm_list)
     restart_local_minion()
+  print "sleeping for %s seconds" % POLL_CYCLE
   time.sleep(POLL_CYCLE)
-
-def main2():
-  try:
-    masters = get_active_salt_masters()
-    print "masters in dynamodb are: %s" % masters
-  except Exception, e:
-    print "Problem fetching masters from dynamodb: %s" % e
-    raise
 
 if __name__ == "__main__":
   try:
-    #main()
-    main2()
+    main()
   except Exception, e:
     print "Unable to execute properly: %s" % e
     sys.exit(1)
