@@ -72,7 +72,7 @@ chmod +x saltminion_bootstrap.py
 /usr/bin/python ./saltminion_bootstrap.py $bucketname $grainsfile
 
 # get our instanceid
-$myid='curl http://169.254.169.254/latest/meta-data/instance-id/'
+myid='curl http://169.254.169.254/latest/meta-data/instance-id/'
 
 # accept our minion key
 salt-key -y -a $myid
