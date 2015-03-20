@@ -82,6 +82,9 @@ salt-call --local state.highstate
 
 # Download instance_manager.py
 mkdir -p /usr/local/bin/phoenix
+aws s3 cp s3://$bucketname/minion/scripts/sqs.py /usr/local/bin/phoenix
+aws s3 cp s3://$bucketname/minion/scripts/msg.py /usr/local/bin/phoenix
+aws s3 cp s3://$bucketname/minion/scripts/key_deleter.py /usr/local/bin/phoenix
 aws s3 cp s3://$bucketname/minion/scripts/instance_manager.py /usr/local/bin/phoenix
 aws s3 cp s3://$bucketname/minion/scripts/instance_manager.conf /etc/init/instance_manager.conf
 chmod +x /usr/local/bin/phoenix/instance_manager.py
