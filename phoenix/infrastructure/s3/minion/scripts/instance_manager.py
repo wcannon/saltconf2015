@@ -116,7 +116,7 @@ def main():
       num_sqs_messages = sqs.get_queue_length(sqs_conn, queue_master)
       for m in range(num_sqs_messages):
         message = sqs.get_a_message(sqs_conn, queue_master)
-        print message
+        print message.__dict__
         print "----------------------------------------"
         print
         # if launch, add to masters, add to minions
