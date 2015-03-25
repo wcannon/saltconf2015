@@ -26,7 +26,7 @@ class MinionInstance(DynamoDBModel):
   __defaults__ = {
      u"modified": lambda: datetime.now(utc_tz),
      u"highstate_ran": False,
-     u"highstate_runner": None,
+     u"highstate_runner": u'no-highstate-runner',
      u"status": u"active",
      }
 
@@ -43,5 +43,5 @@ class MasterInstance(DynamoDBModel):
   __defaults__ = {
      u"modified": lambda: datetime.now(utc_tz),
      u"active": False,
-     u"ipaddr": None,
+     u"ipaddr": u'no-ip-yet',
      }
