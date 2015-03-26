@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import json
+import yaml
 import requests
 
 ''' - for reference -
@@ -25,8 +26,35 @@ curl http://169.254.169.254/latest/dynamic/instance-identity/document/
 class Helper:
     
     def __init__(self):
-        self.METADATA_URL = "http://169.254.169.254/latest/meta-data/"
+        self.METADATA_URL =    "http://169.254.169.254/latest/meta-data/"
         self.DYNAMICDATA_URL = "http://169.254.169.254/latest/dynamic/" 
+        self.AWS_HA_CONFIG_FILE = "/etc/salt/ha/ha-config"
+        self.ha_info = self.load_ha_config_info() # loads region, queuename_master, queuename_minion and etc
+
+    def load_ha_config_info(self, file_path=self.AWS_HA_CONFIG_FILE):
+      '''This provides access to info such as region, queue_name for connecting to sqs and ec2'''
+        try:
+            mydict = yaml.load(open(file_path, "r").read())
+        except Exception, e:
+            # log the exception, but return None
+            raise
+        return mydict
+ 
+   def get_minion_queue_name(self):
+        try:
+            queue_name = self.ha_info.get("queuename_minion", None)
+        except:
+            # log the exception, but return None
+            raise
+        return queue_name
+
+   def get_master_queue_name(self):
+        try:
+            queue_name = self.ha_info.get("queuename_master", None)
+        except:
+            # log the exception, but return None
+            raise
+        return queue_name
 
     def get_region(self):
         try:
@@ -78,4 +106,4 @@ if __name__ == "__main__":
   print "Region is: %s" % my_helper.get_region()
   print "Availability Zone is: %s" % my_helper.get_zone()
   print "InstanceId is: %s" % my_helper.get_instanceid()
-  print "private ip is: %s" % get_private_ip()
+  print "private ip is: %s" % my_helper.get_private_ip()
