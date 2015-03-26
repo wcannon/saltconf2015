@@ -5,23 +5,32 @@ import time
 import helper
 import subprocess
 import ddb
+import salt
+from helper2 import Helper
 
+POLL_CYCLE = 10
+CONFIG_FILE = "/etc/salt/minion"
+SVC_NAME = "salt-minion"
 
 class MasterListManager:
     
-    POLL_CYCLE = 10 
-    CONFIG_FILE = "/etc/salt/minion"
-    TABLE_NAME = "masters"
-    SVC_NAME = "salt-minion"
 
-    def __init__(self):
-        self.opts = salt.config.master_config('/etc/salt/master')
-        self.mymanager = Key(opts)
+    def __init__(self, poll_cycle=None, config_file=None, table_name=None, svc_name=None ):
+        if not poll_cycle:
+            self.poll_cycle = POLL_CYCLE
+        if not config_file:
+            self.config_file = CONFIG_FILE
+        if not table_name:
+            h = Helper()
+            table_name = h.get_master_queue_name()
+            self.table_name = table_name
+        if not svc_name:
+            self.svc_name = SVC_NAME
 
-    def get_current_salt_masters(self, config_file=MasterListManager.CONFIG_FILE):
+    def get_current_salt_masters(self):
       '''retrieve and return the list of current salt masters out of the minion config file'''
       try:
-          info_yaml = yaml.load(open(config_file, "r").read())
+          info_yaml = yaml.load(open(self.config_file, "r").read())
           masters = info_yaml.get('master', [])
       except Exception, e:
           raise
@@ -40,8 +49,10 @@ class MasterListManager:
           raise
       return master_ipaddrs
 
-    def update_config(self, masters_list, config_file=MasterListManager.CONFIG_FILE):
+    def update_config(self, masters_list, config_file=None):
       '''update CONFIG_FILE with active salt masters if needed'''
+      if not config_file:
+          config_file = self.CONFIG_FILE
       try:
           info_yaml = yaml.load(open(config_file, "r").read())
           info_yaml['master'] = masters_list
@@ -62,7 +73,7 @@ class MasterListManager:
           raise
       return
 
-    def main():
+    def main(self):
       try:
           region = helper.get_region()
           ddb.set_region(region)
@@ -91,7 +102,7 @@ class MasterListManager:
                   # print "lists match, sleeping"
           except Exception, e:
                raise
-        time.sleep(POLL_CYCLE)
+          time.sleep(self.poll_cycle)
 
 if __name__ == "__main__":
   m = MasterListManager()
