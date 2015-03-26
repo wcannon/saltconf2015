@@ -44,7 +44,7 @@ class Helper:
  
     def get_minion_queue_name(self):
         try:
-            queue_name = self.ha_info.get("queuename_minion", None)
+            queue_name = self.ha_info_dict.get("queuename_minion", None)
         except:
             # log the exception, but return None
             raise
@@ -52,7 +52,7 @@ class Helper:
 
     def get_master_queue_name(self):
         try:
-            queue_name = self.ha_info.get("queuename_master", None)
+            queue_name = self.ha_info_dict.get("queuename_master", None)
         except:
             # log the exception, but return None
             raise
@@ -110,3 +110,7 @@ if __name__ == "__main__":
   print "InstanceId is: %s" % my_helper.get_instanceid()
   print "private ip is: %s" % my_helper.get_private_ip()
   print "ha-info %s" % my_helper.ha_info_dict
+  print "master queue name %s" % my_helper.get_master_queue_name()
+  print "minion queue name %s" % my_helper.get_minion_queue_name()
+
+

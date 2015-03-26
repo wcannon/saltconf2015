@@ -47,5 +47,4 @@ if __name__ == "__main__":
     conn = boto.sqs.connect_to_region(region)
     s = Sqs(conn, queue_name)
     m = s.get_a_message()
-    print m
-    msg = get_a_message(conn, queue)
+    print m.__dict__
