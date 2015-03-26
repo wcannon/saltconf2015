@@ -29,18 +29,20 @@ class Helper:
         self.METADATA_URL =    "http://169.254.169.254/latest/meta-data/"
         self.DYNAMICDATA_URL = "http://169.254.169.254/latest/dynamic/" 
         self.AWS_HA_CONFIG_FILE = "/etc/salt/ha/ha-config"
-        self.ha_info = self.load_ha_config_info() # loads region, queuename_master, queuename_minion and etc
+        self.ha_info_dict = self.load_ha_config_info() # loads region, queuename_master, queuename_minion and etc
 
-    def load_ha_config_info(self, file_path=self.AWS_HA_CONFIG_FILE):
-      '''This provides access to info such as region, queue_name for connecting to sqs and ec2'''
+    def load_ha_config_info(self, file_path=None):
+        '''This provides access to info such as region, queue_name for connecting to sqs and ec2'''
         try:
+            if not file_path:
+                file_path=self.AWS_HA_CONFIG_FILE
             mydict = yaml.load(open(file_path, "r").read())
         except Exception, e:
             # log the exception, but return None
             raise
         return mydict
  
-   def get_minion_queue_name(self):
+    def get_minion_queue_name(self):
         try:
             queue_name = self.ha_info.get("queuename_minion", None)
         except:
@@ -48,7 +50,7 @@ class Helper:
             raise
         return queue_name
 
-   def get_master_queue_name(self):
+    def get_master_queue_name(self):
         try:
             queue_name = self.ha_info.get("queuename_master", None)
         except:
@@ -107,3 +109,4 @@ if __name__ == "__main__":
   print "Availability Zone is: %s" % my_helper.get_zone()
   print "InstanceId is: %s" % my_helper.get_instanceid()
   print "private ip is: %s" % my_helper.get_private_ip()
+  print "ha-info %s" % my_helper.ha_info_dict
