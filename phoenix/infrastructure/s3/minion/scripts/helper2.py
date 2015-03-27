@@ -58,6 +58,22 @@ class Helper:
             raise
         return queue_name
 
+    def get_master_table_name(self):
+        try:
+            table_name = self.ha_info_dict.get("master_table", None)
+        except:
+            # log the exception, but return None
+            raise
+        return table_name
+
+    def get_minion_table_name(self):
+        try:
+            table_name = self.ha_info_dict.get("minion_table", None)
+        except:
+            # log the exception, but return None
+            raise
+        return table_name
+
     def get_region(self):
         try:
             r = self.get_dynamic_metadata("region")
