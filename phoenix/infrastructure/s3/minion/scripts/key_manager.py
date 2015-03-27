@@ -24,7 +24,6 @@ class KeyManager:
                 raise
         return result
         
-
     def reject_key(self, key):
         '''Reject a key, if it exists'''
         pass
@@ -36,11 +35,15 @@ class KeyManager:
 
     def delete_key(self, key):
         '''Delete a key, if it exists'''
+        result = False
         try:
-            self.mykeymgr.delete_key(key)
+            #current_keys = self.get_minion_keys(status='accepted')
+            if key in self.get_minion_keys(status='accepted'):
+                self.mykeymgr.delete_key(match=key)
+                result = True
         except Exception, e:
-            pass
-        return 
+            raise
+        return result
 
     def delete_keys(self, key_list):
         '''Delete each key in list, if it exists'''
@@ -54,15 +57,29 @@ class KeyManager:
 
     def accept_key(self, key):
         '''Accept a key, if it exists'''
-        pass
+        result = False
+        try:
+            if key in self.get_minion_keys(status='pre'):
+                self.mykeymgr.accept(match=key)
+                result = True
+        except Exception, e:
+            raise
+        return result
 
     def accept_keys(self, key_list):
         '''Accept each key in list, if it exists'''
-        pass
+        if key_list:
+            for key in key_list:
+                try:
+                    self.accept_key(key)
+                except Exception, e:
+                    raise
+        return
 
 
 if __name__ == "__main__":
     k = KeyManager()
-    print k.get_minion_keys(status='pre')
-    print k.get_minion_keys(status='not-valid')
+    print k.get_minion_keys(status='accepted')
+    print k.accept_key(key='i-8f78ac73')
+    print k.get_minion_keys(status='accepted')
     
