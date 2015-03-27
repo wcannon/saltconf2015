@@ -12,8 +12,8 @@ class Msg:
     def get_body(self, message):
         try:
             bodydict = {}
-            #text = message.get_body()
-            mydict = json.loads(message)
+            #text = message.get_body() # using boto sqs message method here
+            mydict = json.loads(self.message)
             messagebody = mydict['Message']
             bodydict = json.loads(messagebody)
         except Exception, e:

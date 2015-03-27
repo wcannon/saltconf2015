@@ -3,7 +3,9 @@ import sys
 import time
 import datetime 
 import logging
-from dynamodb_mapper.model import utc_tz
+import boto
+import boto.sqs
+from dynamodb_mapper.model import utc_tz, DynamoDBModel
 import ddb
 from ddb import MinionInstance
 from ddb import MasterInstance
@@ -25,33 +27,37 @@ class MasterManager:
         self.region = region
         ddb.set_region(self.region)
 
-    def create_or_update_master(self, instanceid, modified, ipaddr, active):
+    def create_or_update_master(self, instanceid, modified, ipaddr, status):
         '''Attempt to retrieve the item update and save it, failing that create it and save it'''
         # no default value for instanceid, has be supplied
         if not instanceid:
             raise
         try:
             r = ddb.MasterInstance.get(instanceid)
-            if r:
-                print "Entry exists for instanceid %s" % instanceid
-                if modified:
-                    r.modified = modified
-                if ipaddr:
-                    r.ipaddr = ipaddr
-                if active:
-                    r.active = active
-                r.save()
-            else:  # no entry yet, let's make one
-                print "Entry does not exist for instanceid %s, creating one." % instanceid
-                mm = MasterInstance()
-                mm.instanceid = instanceid
-                if modified:
-                    mm.modified = modified
-                if ipaddr:
-                    mm.ipaddr = ipaddr
-                if active:
-                    mm.active = active
-                mm.save()
+            print "Entry exists for instanceid %s" % instanceid
+            if modified:
+                r.modified = modified
+            if ipaddr:
+                r.ipaddr = unicode(ipaddr)
+            if status:
+                r.status = unicode(status)
+            r.save(raise_on_conflict=True)
+        #except ConflictError:  --- add this in later, design saves us from issue for now
+        #    # giving a second try to save the data
+        #    time.sleep(2)
+        #    self.create_or_update_master(instanceid, modified, ipaddr, status)
+
+        except boto.exception.BotoClientError:
+            print "Entry does not exist for instanceid %s, creating one." % instanceid
+            mm = MasterInstance()
+            mm.instanceid = instanceid
+            if modified:
+                mm.modified = modified
+            if ipaddr:
+                mm.ipaddr = unicode(ipaddr)
+            if status:
+                mm.status = unicode(status)
+            mm.save()
         except Exception, e:
             raise
         return
@@ -64,8 +70,44 @@ class MinionManager:
         self.region = region
         ddb.set_region(self.region)
 
-    def create_or_update_minion(self, instanceid, modified, highstate_ran, highstate_runner, status):
-        pass
+    def create_or_update_master(self, instanceid, modified, highstate_runner, highstate_ran, status):
+        '''Attempt to retrieve the item update and save it, failing that create it and save it'''
+        # no default value for instanceid, has be supplied
+        if not instanceid:
+            raise
+        try:
+            r = ddb.MasterInstance.get(instanceid)
+            print "Entry exists for instanceid %s" % instanceid
+            if modified:
+                r.modified = modified
+            if highstate_runner:
+                r.highstate_runner = highstate_runner
+            if highstate_ran:
+                r.highstate_ran = highstate_ran
+            if status:
+                r.status = status
+            r.save(raise_on_conflict=True)
+        #except ConflictError:  --- Must fix this for race condition of running highstates
+        #    # giving a second try to save the data
+        #    time.sleep(2)
+        #    self.create_or_update_minion.....(instanceid, modified, ipaddr, status)
+
+        except boto.exception.BotoClientError:
+            print "Entry does not exist for instanceid %s, creating one." % instanceid
+            mm = MasterInstance()
+            mm.instanceid = instanceid
+            if modified:
+                mm.modified = modified
+            if highstate_runner:
+                mm.highstate_runner = highstate_runner
+            if highstate_ran:
+                mm.highstate_ran = highstate_ran
+            if status:
+                mm.status = status
+            mm.save()
+        except Exception, e:
+            raise
+        return
 
     def get_terminated(self):
         '''Scan the dynamodb table for all minions with status == terminated, return list'''
@@ -74,7 +116,7 @@ class MinionManager:
         try:
             minions = mm.scan()
             for m in minions:
-                if m.status == 'terminated':
+                if m.status == 'TERMINATE':
                     terminated_minions.append(str(m.instanceid))
         except Exception, e:
             raise
@@ -84,9 +126,6 @@ class MinionManager:
     def terminate_minion(self, instanceid):
         pass
 '''
-
-def update_local_sm_info():
-    pass
 
 def main():
     # getting local info from ha-config file
@@ -107,18 +146,58 @@ def main():
         print "master_table: %s" % master_table
         print "minion_table: %s" % minion_table
     except Exception, e:
+        print "Error when looking up data in ha-config: %s" % e
         raise
 
+    # this salt master updates info about itself into dynamodb
     try:
         modified = datetime.datetime.now(utc_tz)
         local_master = MasterManager(region)
         local_master.create_or_update_master(instanceid=instanceid, modified=modified,
-                                             ipaddr=ipaddr, active=True)
+                                             ipaddr=ipaddr, status=u'LAUNCH' )
     except Exception, e:
         raise
+
+    # Need sqs instances
+    try:
+        sqs_master = Sqs(boto.sqs.connect_to_region(region), master_queue)
+        sqs_minion = Sqs(boto.sqs.connect_to_region(region), minion_queue)
+    except Exception, e:
+        raise
+
+    # This is the endless loop of goodness
+    while True:
+        try:
+            master_queue_length = sqs_master.get_queue_length()
+            if master_queue_length > 0:
+                for i in range(master_queue_length):
+                    message = sqs_master.get_a_message() 
+                    if not message:
+                        continue
+                    print "type of message is: %s" % type(message)
+                    message_body = message.get_body() # using boto sqs message method here
+                    print "message body:"
+                    print message_body
+                    msg = Msg(message_body)
+                    instance_id = msg.get_instance_id()
+                    print "instance_id: %s" % instance_id
+                    status = msg.get_instance_action() # LAUNCH or TERMINATE or None
+                    print "status: %s" % status
+                    if not status or not instance_id:
+                        continue
+                    else:
+                        print "region is: %s" % region
+                        master_mgr = MasterManager(region)
+                        master_mgr.create_or_update_master(instanceid, modified, ipaddr, status)
+                        minion_mgr = MinionManager(region)
+                        minion_mgr.create_or_update_master(instanceid, modified, highstate_runner,
+                                                           highstate_ran, status)
+                    #msg.delete_a_message(message)
+        except Exception, e:
+            print "oops: %s" % e
+        break    
+   
        
-    # get info to use from ha config file
-    # update local salt master info in dynamodb
     # BIG LOOP
         # poll masters sqs queue
         # update dynamodb master table
