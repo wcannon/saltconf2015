@@ -29,6 +29,13 @@ class Sqs:
             raise
         return message
 
+    def get_message_body(self, message):
+        try:
+            body = message.get_body()
+        except Exception, e:
+            raise
+        return body
+
     def delete_a_message(self, message):
         try:
             myq = self.conn.get_queue(self.queue)
