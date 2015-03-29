@@ -168,6 +168,7 @@ def main():
 
     # This is the endless loop of goodness
     while True:
+        # Handling autoscaling sns messages for the salt master group
         try:
             master_queue_length = sqs_master.get_queue_length()
             if master_queue_length > 0:
@@ -175,32 +176,57 @@ def main():
                     message = sqs_master.get_a_message() 
                     if not message:
                         continue
-                    print "type of message is: %s" % type(message)
+                    print "MASTER: type of message is: %s" % type(message)
                     message_body = message.get_body() # using boto sqs message method here
-                    print "message body:"
-                    print message_body
+                    #print "MASTER: message body:"
+                    #print message_body
                     msg = Msg(message_body)
                     instance_id = msg.get_instance_id()
-                    print "instance_id: %s" % instance_id
+                    print "MASTER: instance_id: %s" % instance_id
                     status = msg.get_instance_action() # LAUNCH or TERMINATE or None
-                    print "status: %s" % status
+                    print "MASTER: status: %s" % status
                     if not status or not instance_id:
-                        print "status: %s" % status
-                        print "instance_id: %s" % instance_id
+                        #print "status: %s" % status
+                        #print "instance_id: %s" % instance_id
                         continue
                     else:
-                        print "region right before function is: %s" % region
                         master_mgr = MasterManager(region)
-                        master_mgr.create_or_update_master(instanceid, modified=None, ipaddr=None, status=unicode(status))
-                        print "region in function is: %s" % region
+                        master_mgr.create_or_update_master(instanceid=instance_id, modified=None, ipaddr=None, status=unicode(status))
                         minion_mgr = MinionManager(region)
-                        minion_mgr.create_or_update_minion(instanceid, modified=None, highstate_runner=None,
+                        minion_mgr.create_or_update_minion(instanceid=instance_id, modified=None, highstate_runner=None,
                                                            highstate_ran=None, status=unicode(status))
-                        print "region right after function is: %s" % region
                     #msg.delete_a_message(message)
         except Exception, e:
             print "oops: %s" % e
-        break    
+        
+        # Handling autoscaling sns messages for the minion group
+        try:
+            minion_queue_length = sqs_minion.get_queue_length()
+            if minion_queue_length > 0:
+                for i in range(minion_queue_length):
+                    message = sqs_minion.get_a_message() 
+                    if not message:
+                        continue
+                    print "MINION: type of message is: %s" % type(message)
+                    message_body = message.get_body() # using boto sqs message method here
+                    #print "MINION: message body:"
+                    #print message_body
+                    msg = Msg(message_body)
+                    instance_id = msg.get_instance_id()
+                    print "MINION: instance_id: %s" % instance_id
+                    status = msg.get_instance_action() # LAUNCH or TERMINATE or None
+                    print "MINION: status: %s" % status
+                    if not status or not instance_id:
+                        #print "status: %s" % status
+                        #print "instance_id: %s" % instance_id
+                        continue
+                    else:
+                        minion_mgr = MinionManager(region)
+                        minion_mgr.create_or_update_minion(instanceid=instance_id, modified=None, highstate_runner=None,
+                                                           highstate_ran=None, status=unicode(status))
+                    #msg.delete_a_message(message)
+        except Exception, e:
+            print "oops: %s" % e
    
        
     # BIG LOOP
