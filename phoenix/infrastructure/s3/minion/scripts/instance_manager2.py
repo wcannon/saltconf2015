@@ -112,7 +112,7 @@ class MinionManager:
         return
 
     def get_terminated(self):
-        '''Scan the dynamodb table for all minions with status == terminated, return list'''
+        '''Scan the dynamodb table for all minions with status == TERMINATE, return list'''
         mm = MinionInstance()
         terminated_minions = []
         try:
@@ -124,10 +124,19 @@ class MinionManager:
             raise
         return terminated_minions
 
-''' # Remove minion keys from my local salt master if their status is not active in dynamodb
-    def terminate_minion(self, instanceid):
-        pass
-'''
+    def get_launched(self):
+        '''Scan the dynamodb table for all minions with status == LAUNCH, return list'''
+        mm = MinionInstance()
+        terminated_minions = []
+        try:
+            minions = mm.scan()
+            for m in minions:
+                if m.status == 'LAUNCH':
+                    terminated_minions.append(str(m.instanceid))
+        except Exception, e:
+            raise
+        return terminated_minions
+
 
 def main():
     # getting local info from ha-config file
