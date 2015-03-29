@@ -16,10 +16,11 @@ from helper2 import Helper
 
 
 POLL_CYCLE = 15 # seconds to sleep between polling dynamodb for list of active salt masters
-MASTERS_TABLE_NAME = "masters"
-MINIONS_TABLE_NAME = "minions"
-MASTER_QUEUE = "SqsMaster"
-MINION_QUEUE = "SqsMinion"
+# Sourcing the info below from the ha-config file
+#MASTERS_TABLE_NAME = "masters"
+#MINIONS_TABLE_NAME = "minions"
+#MASTER_QUEUE = "SqsMaster"
+#MINION_QUEUE = "SqsMinion"
 
 
 class MasterManager:                                                                                                    
@@ -34,7 +35,7 @@ class MasterManager:
             raise
         try:
             r = ddb.MasterInstance.get(instanceid)
-            print "Master entry exists for instanceid %s" % instanceid
+            #print "Master entry exists for instanceid %s" % instanceid
             if modified:
                 r.modified = modified
             if ipaddr:
@@ -48,7 +49,7 @@ class MasterManager:
         #    self.create_or_update_master(instanceid, modified, ipaddr, status)
 
         except boto.exception.BotoClientError:
-            print "Minion entry does not exist for instanceid %s, creating one." % instanceid
+            #print "Minion entry does not exist for instanceid %s, creating one." % instanceid
             mm = MasterInstance()
             mm.instanceid = instanceid
             if modified:
@@ -78,7 +79,7 @@ class MinionManager:
             raise
         try:
             r = ddb.MinionInstance.get(instanceid)
-            print "Minion entry exists for instanceid %s" % instanceid
+            #print "Minion entry exists for instanceid %s" % instanceid
             if modified:
                 r.modified = modified
             if highstate_runner:
@@ -94,7 +95,7 @@ class MinionManager:
         #    self.create_or_update_minion.....(instanceid, modified, ipaddr, status)
 
         except boto.exception.BotoClientError:
-            print "Minion entry does not exist for instanceid %s, creating one." % instanceid
+            #print "Minion entry does not exist for instanceid %s, creating one." % instanceid
             mm = MinionInstance()
             mm.instanceid = instanceid
             if modified:
@@ -139,15 +140,15 @@ def main():
         minion_queue = h.get_minion_queue_name()
         master_table = h.get_master_table_name() 
         minion_table = h.get_minion_table_name()
-        print "region: %s" % region
-        print "instanceid: %s" % instanceid
-        print "ipaddr: %s" % ipaddr
-        print "master_queue: %s" % master_queue
-        print "minion_queue: %s" % minion_queue
-        print "master_table: %s" % master_table
-        print "minion_table: %s" % minion_table
+        #print "region: %s" % region
+        #print "instanceid: %s" % instanceid
+        ##print "ipaddr: %s" % ipaddr
+        #print "master_queue: %s" % master_queue
+        #print "minion_queue: %s" % minion_queue
+        #print "master_table: %s" % master_table
+        #print "minion_table: %s" % minion_table
     except Exception, e:
-        print "Error when looking up data in ha-config: %s" % e
+        #print "Error when looking up data in ha-config: %s" % e
         raise
 
     # this salt master updates info about itself into dynamodb
@@ -176,15 +177,15 @@ def main():
                     message = sqs_master.get_a_message() 
                     if not message:
                         continue
-                    print "MASTER: type of message is: %s" % type(message)
+                    #print "MASTER: type of message is: %s" % type(message)
                     message_body = message.get_body() # using boto sqs message method here
                     #print "MASTER: message body:"
                     #print message_body
                     msg = Msg(message_body)
                     instance_id = msg.get_instance_id()
-                    print "MASTER: instance_id: %s" % instance_id
+                    #print "MASTER: instance_id: %s" % instance_id
                     status = msg.get_instance_action() # LAUNCH or TERMINATE or None
-                    print "MASTER: status: %s" % status
+                    #print "MASTER: status: %s" % status
                     if not status or not instance_id:
                         #print "status: %s" % status
                         #print "instance_id: %s" % instance_id
@@ -195,9 +196,10 @@ def main():
                         minion_mgr = MinionManager(region)
                         minion_mgr.create_or_update_minion(instanceid=instance_id, modified=None, highstate_runner=None,
                                                            highstate_ran=None, status=unicode(status))
-                    #msg.delete_a_message(message)
+                    sqs_master.delete_a_message(message)
         except Exception, e:
-            print "oops: %s" % e
+            print "Exception handling master instances: %s" % e
+            raise
         
         # Handling autoscaling sns messages for the minion group
         try:
@@ -207,15 +209,15 @@ def main():
                     message = sqs_minion.get_a_message() 
                     if not message:
                         continue
-                    print "MINION: type of message is: %s" % type(message)
+                    #print "MINION: type of message is: %s" % type(message)
                     message_body = message.get_body() # using boto sqs message method here
                     #print "MINION: message body:"
                     #print message_body
                     msg = Msg(message_body)
                     instance_id = msg.get_instance_id()
-                    print "MINION: instance_id: %s" % instance_id
+                    #print "MINION: instance_id: %s" % instance_id
                     status = msg.get_instance_action() # LAUNCH or TERMINATE or None
-                    print "MINION: status: %s" % status
+                    #print "MINION: status: %s" % status
                     if not status or not instance_id:
                         #print "status: %s" % status
                         #print "instance_id: %s" % instance_id
@@ -224,19 +226,20 @@ def main():
                         minion_mgr = MinionManager(region)
                         minion_mgr.create_or_update_minion(instanceid=instance_id, modified=None, highstate_runner=None,
                                                            highstate_ran=None, status=unicode(status))
-                    #msg.delete_a_message(message)
+                    sqs_minion.delete_a_message(message)
         except Exception, e:
-            print "oops: %s" % e
-   
-       
-    # BIG LOOP
-        # poll masters sqs queue
-        # update dynamodb master table
-        # update dynamodb minion table with master entry
-        # poll minion sqs queue
-        # update minion dynamodb table
-        # retrieve terminated minions from dynamodb table, and remove their salt keys from local master
-        # sleep the poll cycle time
+            print "Error handling minion instances: %s" % e
+            raise
+  
+        # Remove terminated minions keys from our salt master 
+        try:
+           minion_mgr = MinionManager(region)
+           minions_terminated_list = minion_mgr.get_terminated()
+           k = KeyManager()
+           k.delete_keys(minions_terminated_list)
+        except Exception, e:
+            raise 
+        time.sleep(POLL_CYCLE)
 
   
 
