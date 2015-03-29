@@ -34,7 +34,7 @@ class MasterManager:
             raise
         try:
             r = ddb.MasterInstance.get(instanceid)
-            print "Entry exists for instanceid %s" % instanceid
+            print "Master entry exists for instanceid %s" % instanceid
             if modified:
                 r.modified = modified
             if ipaddr:
@@ -48,7 +48,7 @@ class MasterManager:
         #    self.create_or_update_master(instanceid, modified, ipaddr, status)
 
         except boto.exception.BotoClientError:
-            print "Entry does not exist for instanceid %s, creating one." % instanceid
+            print "Minion entry does not exist for instanceid %s, creating one." % instanceid
             mm = MasterInstance()
             mm.instanceid = instanceid
             if modified:
@@ -59,6 +59,7 @@ class MasterManager:
                 mm.status = unicode(status)
             mm.save()
         except Exception, e:
+            print "unhandled exception: %s" % e
             raise
         return
 
@@ -66,18 +67,18 @@ class MasterManager:
         pass
 
 class MinionManager:                                                                                                    
-    def __init__(self, regin):
+    def __init__(self, region):
         self.region = region
         ddb.set_region(self.region)
 
-    def create_or_update_master(self, instanceid, modified, highstate_runner, highstate_ran, status):
+    def create_or_update_minion(self, instanceid, modified, highstate_runner, highstate_ran, status):
         '''Attempt to retrieve the item update and save it, failing that create it and save it'''
         # no default value for instanceid, has be supplied
         if not instanceid:
             raise
         try:
-            r = ddb.MasterInstance.get(instanceid)
-            print "Entry exists for instanceid %s" % instanceid
+            r = ddb.MinionInstance.get(instanceid)
+            print "Minion entry exists for instanceid %s" % instanceid
             if modified:
                 r.modified = modified
             if highstate_runner:
@@ -93,8 +94,8 @@ class MinionManager:
         #    self.create_or_update_minion.....(instanceid, modified, ipaddr, status)
 
         except boto.exception.BotoClientError:
-            print "Entry does not exist for instanceid %s, creating one." % instanceid
-            mm = MasterInstance()
+            print "Minion entry does not exist for instanceid %s, creating one." % instanceid
+            mm = MinionInstance()
             mm.instanceid = instanceid
             if modified:
                 mm.modified = modified
@@ -184,14 +185,18 @@ def main():
                     status = msg.get_instance_action() # LAUNCH or TERMINATE or None
                     print "status: %s" % status
                     if not status or not instance_id:
+                        print "status: %s" % status
+                        print "instance_id: %s" % instance_id
                         continue
                     else:
-                        print "region is: %s" % region
+                        print "region right before function is: %s" % region
                         master_mgr = MasterManager(region)
-                        master_mgr.create_or_update_master(instanceid, modified, ipaddr, status)
+                        master_mgr.create_or_update_master(instanceid, modified=None, ipaddr=None, status=unicode(status))
+                        print "region in function is: %s" % region
                         minion_mgr = MinionManager(region)
-                        minion_mgr.create_or_update_master(instanceid, modified, highstate_runner,
-                                                           highstate_ran, status)
+                        minion_mgr.create_or_update_minion(instanceid, modified=None, highstate_runner=None,
+                                                           highstate_ran=None, status=unicode(status))
+                        print "region right after function is: %s" % region
                     #msg.delete_a_message(message)
         except Exception, e:
             print "oops: %s" % e
