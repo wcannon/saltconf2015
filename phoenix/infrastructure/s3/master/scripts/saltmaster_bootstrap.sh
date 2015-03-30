@@ -84,7 +84,7 @@ salt-key -y -a $myid
 # run local highstate
 salt-call --local state.highstate
 
-# Download instance_manager.py
+# Download instance_manager and other necessary classes
 mkdir -p /usr/local/bin/phoenix
 aws s3 cp s3://$bucketname/minion/scripts/sqs.py /usr/local/bin/phoenix
 aws s3 cp s3://$bucketname/minion/scripts/helper.py /usr/local/bin/phoenix
