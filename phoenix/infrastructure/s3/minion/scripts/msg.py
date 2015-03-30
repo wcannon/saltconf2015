@@ -1,53 +1,65 @@
 #!/usr/bin/env python
 import sys
 import json
-import logging
 
-log = logging.getLogger(__name__)
 
-def get_body(message):
-    try:
-      bodydict = {}
-      text = message.get_body()
-      mydict = json.loads(text)
-      messagebody = mydict['Message']
-      bodydict = json.loads(messagebody)
-    except Exception, e:
-      log.error("Error: %s" % e)
-    return bodydict.get('Event', None)
+class Msg:
     
-def get_instance_id(message):
-    try:
-      bodydict = {}
-      text = message.get_body()
-      mydict = json.loads(text)
-      messagebody = mydict['Message']
-      bodydict = json.loads(messagebody)
-    except Exception, e:
-      log.error("Error: %s" % e)
-    return bodydict.get('EC2InstanceId', None)
+    def __init__(self, message):
+        if message:
+            self.message = message
 
-def get_instance_action(message):
-    try:
-      bodydict = {}
-      actual_event = None
-      text = message.get_body()
-      mydict = json.loads(text)
-      messagebody = mydict['Message']
-      bodydict = json.loads(messagebody)
-      event = bodydict.get('Event', None)
-      # autoscaling:EC2_INSTANCE_LAUNCH
-      if event:
-        actual_event = event.split(":")[-1]
-    except Exception, e:
-      log.error("Error: %s" % e)
-      pass
-    #return bodydict.get('Event', None)
-    return actual_event
+    def get_body(self, message):
+        try:
+            bodydict = {}
+            #text = message.get_body() # using boto sqs message method here
+            mydict = json.loads(self.message)
+            messagebody = mydict['Message']
+            bodydict = json.loads(messagebody)
+        except Exception, e:
+            # log.error("Error: %s" % e)
+            print e
+        #return bodydict.get('Event', None)
+        return bodydict
+    
+    def get_instance_id(self):
+        try:
+            text = self.get_body(self.message)
+        except Exception, e:
+            # log.error("Error: %s" % e)
+            print e
+        return text.get('EC2InstanceId', None)
+
+    def get_instance_action(self):
+        try:
+            bodydict = {}
+            actual_event = None
+            text = self.get_body(self.message)
+            event = text.get('Event', None)
+            # example string being split --> autoscaling:EC2_INSTANCE_LAUNCH
+            if event == "autoscaling:EC2_INSTANCE_LAUNCH":
+                result = "LAUNCH"
+            elif event == "autoscaling:EC2_INSTANCE_TERMINATE":
+                result = "TERMINATE"
+            else:
+                result = None
+        except Exception, e:
+            # log.error("Error: %s" % e)
+            pass
+        return result
 
 if __name__ == "__main__":
-  filename = sys.argv[1]
-  f = open(filename, "r")
-  message = f.read()
-  print "instance id: %s" % get_instance_id(message)
-  print "instance action: %s" % get_instance_action(message)
+  message = None
+  try:
+      filename = sys.argv[1]
+      f = open(filename, "r")
+      message = f.read()
+  except Exception, e:
+      print "Unable to read message input file: %s" % e
+
+  try:
+      m = Msg(message)
+      print "instance id: %s" % m.get_instance_id()
+      print "instance action: %s" % m.get_instance_action()
+  except Exception, e:
+      print "Unable to retrieve data from message: %s" % e

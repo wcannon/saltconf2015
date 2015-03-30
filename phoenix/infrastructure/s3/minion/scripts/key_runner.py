@@ -3,8 +3,8 @@ import sys
 import salt
 import salt.client
 from key_manager import KeyManager
-from instance_manager2 import MinionManager
-from helper2 import Helper
+from instance_manager import MinionManager
+from helper import Helper
 
 # minion id = aws instance_id
 

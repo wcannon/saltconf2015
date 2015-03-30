@@ -109,8 +109,6 @@ def main(bucket_name, grains_file, masters_table):
 
    
 if __name__ == "__main__":
-  # expecting two parameters
-  # p1 = bucket name, p2 = filename of grains file 
   bucket_name = sys.argv[1]
   grains_file = sys.argv[2]
   masters_table = sys.argv[3]

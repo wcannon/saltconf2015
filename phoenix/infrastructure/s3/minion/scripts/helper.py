@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 import json
+import yaml
 import requests
 
-METADATA_URL = "http://169.254.169.254/latest/meta-data/"
-DYNAMICDATA_URL = "http://169.254.169.254/latest/dynamic/" 
-'''
+''' - for reference -
 curl http://169.254.169.254/latest/dynamic/instance-identity/document/
 {
   "accountId" : "012800249358",
@@ -24,54 +23,110 @@ curl http://169.254.169.254/latest/dynamic/instance-identity/document/
 }
 '''
 
-def get_region():
-  r = None
-  try:
-    dyn_info = json.loads(get_dynamic_metadata("instance-identity/document/"))
-    r = dyn_info.get("region", "None")
-  except:
-    pass
-  return r
+class Helper:
+    
+    def __init__(self):
+        self.METADATA_URL =    "http://169.254.169.254/latest/meta-data/"
+        self.DYNAMICDATA_URL = "http://169.254.169.254/latest/dynamic/" 
+        self.AWS_HA_CONFIG_FILE = "/etc/salt/ha/ha-config"
+        self.ha_info_dict = self.load_ha_config_info() # loads region, queuename_master, queuename_minion and etc
 
-def get_zone():
-  r = None
-  try:
-    dyn_info = json.loads(get_dynamic_metadata("instance-identity/document/"))
-    r = dyn_info.get("availabilityZone", "None")
-  except:
-    pass
-  return r
+    def load_ha_config_info(self, file_path=None):
+        '''This provides access to info such as region, queue_name for connecting to sqs and ec2'''
+        try:
+            if not file_path:
+                file_path=self.AWS_HA_CONFIG_FILE
+            mydict = yaml.load(open(file_path, "r").read())
+        except Exception, e:
+            # log the exception, but return None
+            raise
+        return mydict
+ 
+    def get_minion_queue_name(self):
+        try:
+            queue_name = self.ha_info_dict.get("queuename_minion", None)
+        except:
+            # log the exception, but return None
+            raise
+        return queue_name
 
-def get_instanceid():
-  r = None
-  try:
-    dyn_info = json.loads(get_dynamic_metadata("instance-identity/document/"))
-    r = dyn_info.get("instanceId", "None")
-  except:
-    pass
-  return r
+    def get_master_queue_name(self):
+        try:
+            queue_name = self.ha_info_dict.get("queuename_master", None)
+        except:
+            # log the exception, but return None
+            raise
+        return queue_name
 
-def get_private_ip():
-  r = None
-  try:
-    dyn_info = json.loads(get_dynamic_metadata("instance-identity/document/"))
-    r = dyn_info.get("privateIp", "None")
-  except:
-    pass
-  return r
+    def get_master_table_name(self):
+        try:
+            table_name = self.ha_info_dict.get("master_table", None)
+        except:
+            # log the exception, but return None
+            raise
+        return table_name
 
-def get_dynamic_metadata(info):
-  content = None
-  try:
-    url = DYNAMICDATA_URL + info
-    r = requests.get(url)
-    content = r.content
-  except:
-    raise
-  return content
+    def get_minion_table_name(self):
+        try:
+            table_name = self.ha_info_dict.get("minion_table", None)
+        except:
+            # log the exception, but return None
+            raise
+        return table_name
+
+    def get_region(self):
+        try:
+            r = self.get_dynamic_metadata("region")
+        except:
+            # log the exception, but return None
+            raise
+        return r
+
+    def get_zone(self):
+        try:
+            r = self.get_dynamic_metadata("availabilityZone")
+        except:
+            # log the exception, but return None
+            raise
+        return r
+
+    def get_instanceid(self):
+        try:
+            r = self.get_dynamic_metadata("instanceId")
+        except:
+            # log the exception, but return None
+            raise
+        return r
+
+    def get_private_ip(self):
+        try:
+            r = self.get_dynamic_metadata("privateIp")
+        except:
+            # log the exception, but return None
+            raise
+        return r
+
+    def get_dynamic_metadata(self, requested_info):
+        '''Returns the dynamic data document as dictionary -- see top of file for reference'''
+        result = None
+        try:
+            url = self.DYNAMICDATA_URL + "instance-identity/document/"
+            r = requests.get(url)
+            content = r.content
+            content_as_dict = json.loads(content)
+            result = content_as_dict.get(requested_info, None)
+        except:
+            raise
+        return result
 
 if __name__ == "__main__":
-  print "region is: %s" % get_region()
-  print "zone is: %s" % get_zone()
-  print "instanceId is: %s" % get_instanceid()
-  print "private ip is: %s" % get_private_ip()
+  my_helper = Helper()
+  print "Region is: %s" % my_helper.get_region()
+  print "Availability Zone is: %s" % my_helper.get_zone()
+  print "InstanceId is: %s" % my_helper.get_instanceid()
+  print "private ip is: %s" % my_helper.get_private_ip()
+  print "ha-info %s" % my_helper.ha_info_dict
+  print "master queue name %s" % my_helper.get_master_queue_name()
+  print "minion queue name %s" % my_helper.get_minion_queue_name()
+
+
