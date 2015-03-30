@@ -90,6 +90,24 @@
       "AllowedPattern" : "[-_ a-zA-Z0-9]*",
       "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores.",
       "Default" : "saltconf2015-solution-3"
+    },
+    "MinionTable" : {
+      "Description" : "Name of the dynamodb table used for minion instance information",
+      "Type" : "String",
+      "MinLength": "1",
+      "MaxLength": "128",
+      "AllowedPattern" : "[-_ a-zA-Z0-9]*",
+      "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores.",
+      "Default" : "minions"
+    },
+    "MasterTable" : {
+      "Description" : "Name of the dynamodb table used for master instance information",
+      "Type" : "String",
+      "MinLength": "1",
+      "MaxLength": "128",
+      "AllowedPattern" : "[-_ a-zA-Z0-9]*",
+      "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores.",
+      "Default" : "masters"
     }
 
   },
@@ -381,7 +399,7 @@
           "pip install --upgrade boto\n",
           "aws s3 cp s3://", {"Ref":"BucketName"}, "/master/scripts/saltmaster_bootstrap.sh . \n",
           "chmod +x saltmaster_bootstrap.sh\n",
-          "/bin/bash ./saltmaster_bootstrap.sh ",{"Ref":"BucketName"}," ",{"Ref":"Region"}," ",{"Ref":"QueueMinion"}," ",{"Ref":"QueueMaster"}," "," saltmaster","\n"
+          "/bin/bash ./saltmaster_bootstrap.sh ",{"Ref":"BucketName"}," ",{"Ref":"Region"}," ",{"Ref":"QueueMinion"}," ",{"Ref":"QueueMaster"}," "," saltmaster", " ", {"Ref":"MinionTable"}, " ", {"Ref":"MasterTable"}, "\n"
         ]]}}
    }
  },
@@ -440,7 +458,7 @@
           "pip install --upgrade awscli\n",
           "aws s3 cp s3://", {"Ref":"BucketName"}, "/minion/scripts/saltminion_bootstrap.py . \n",
           "chmod +x saltminion_bootstrap.py\n",
-          "/usr/bin/python ./saltminion_bootstrap.py", " ", {"Ref":"BucketName"}, " webserver",  "\n"
+          "/usr/bin/python ./saltminion_bootstrap.py", " ", {"Ref":"BucketName"}, " webserver", " ", {"Ref":"MasterTable"}, "\n"
         ]]}}
    }
  },

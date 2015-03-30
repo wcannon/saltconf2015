@@ -64,8 +64,30 @@ class MasterManager:
             raise
         return
 
+    def get_active(self):
+        master_list = []
+        try:
+            mm = MasterInstance()
+            masters = mm.scan()
+            for m in masters:
+                if m.status == 'LAUNCH' and m.ipaddr != u'no-ip-yet':
+                    master_list.append(m)
+        except Exception, e:
+            raise
+        return master_list
+
     def get_terminated(self):
-        pass
+        master_list = []
+        try:
+            mm = MasterInstance()
+            masters = mm.scan()
+            for m in masters:
+                if m.status == 'TERMINATE':
+                    master_list.append(m)
+        except Exception, e:
+            raise
+        return master_list
+
 
 class MinionManager:                                                                                                    
     def __init__(self, region):

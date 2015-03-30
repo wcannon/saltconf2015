@@ -7,6 +7,8 @@ region=$2
 queuename_minion=$3
 queuename_master=$4
 grainsfile=$5
+minion_table=$6
+master_table=$7
 
 # set up ppa for saltstack
 add-apt-repository -y ppa:saltstack/salt
@@ -30,6 +32,8 @@ echo "bucket_name: $bucketname" >> /etc/salt/ha/ha-config
 echo "region: $region" >> /etc/salt/ha/ha-config
 echo "queuename_minion: $queuename_minion" >> /etc/salt/ha/ha-config
 echo "queuename_master: $queuename_master" >> /etc/salt/ha/ha-config
+echo "minion_table: $minion_table" >> /etc/salt/ha/ha-config
+echo "master_table: $master_table" >> /etc/salt/ha/ha-config
 
 # Check to see if our saltmaster.pem file exists by doing a simple ls on the expected location
 # If not, we are the first saltmster, and will push our keys into the bucket

@@ -1,14 +1,16 @@
 #!/usr/bin/env python
+import os
 import sys
 import requests
 import subprocess
 
 METADATA_URL = "http://169.254.169.254/latest/meta-data/"
 MINION_CONFIG = "/etc/salt/minion"
+CONFIG_DIR = "/etc/salt/ha"
 
 # Note:  a grains file should represent a type of server
 commands = [
-	  	['add-apt-repository', '-y', 'ppa:saltstack/salt'],
+                ['add-apt-repository', '-y', 'ppa:saltstack/salt'],
                 ['apt-get', 'update'],
                 ['apt-get', 'install', '-y', 'salt-minion', 'python-requests', 'python-pip'],
                 ['aws', 's3', 'cp', 's3://BUCKET/minion/config/minion_config', '/etc/salt/minion'],
@@ -51,11 +53,25 @@ def run_substitutions(list_of_strs, old, new):
     t = s.replace(old, new)
     new_list.append(t)
   return new_list
-     
-def main(bucket_name, grains_file):
+    
+def write_config_file(bucket, masters_table):
+  '''Write a file that can be referenced by other scripts during ec2 instance lifetime'''
+  config_dir = CONFIG_DIR
+  mydict = {'bucket': bucket, 'masters_table': masters_table}
+  try:
+    os.mkdir(config_dir)
+    f = open(config_dir + os.sep + "ha-config", "w")
+    for k,v in mydict.items():
+      f.write(k + ":" + v + "\n")
+  except:
+    raise
+  return
+  
+def main(bucket_name, grains_file, masters_table):
   output = "place holder" 
   # Run the main set of commands to bootstrap the minion 
   try:
+    write_config_file(bucket_name, masters_table)
     for cmd_as_list in commands:
       # simply allowing an easy substitution for the bucket name
       updated_cmd_as_list = run_substitutions(cmd_as_list, 'BUCKET', bucket_name)
@@ -97,7 +113,8 @@ if __name__ == "__main__":
   # p1 = bucket name, p2 = filename of grains file 
   bucket_name = sys.argv[1]
   grains_file = sys.argv[2]
+  masters_table = sys.argv[3]
   try:
-    main(bucket_name, grains_file) 
+    main(bucket_name, grains_file, masters_table) 
   except Exception, e:
     print "Error! %s" % e

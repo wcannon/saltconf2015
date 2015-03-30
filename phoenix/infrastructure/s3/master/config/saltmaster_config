@@ -653,7 +653,7 @@
 #  - 'https://github.com/saltstack/salt-winrepo.git'
 
 file_recv: True
-runner_dirs: ['/srv/salt/runners']
+runner_dirs: ['/srv/salt/runners', '/usr/local/bin/phoenix']
 
 file_roots:
   base:
@@ -665,6 +665,6 @@ pillar_roots:
 
 reactor:
   - 'salt/auth':
-    - '/srv/reactor/key_manager.sls'
+    - '/srv/reactor/key_reactor.sls'
   - 'salt/key':
-    - '/srv/reactor/highstate_manager.sls'
+    - '/srv/reactor/highstate_reactor.sls'
