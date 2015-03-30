@@ -58,7 +58,7 @@ def write_config_file(bucket, masters_table):
   mydict = {'bucket': bucket, 'masters_table': masters_table}
   try:
     if not os.path.exists(config_dir):
-        os.mkdir(config_dir)
+        os.makedirs(config_dir)
     my_file_path = config_dir + os.sep + "ha-config"
     if not os.path.exists(my_file_path):  # means we're not on a salt-master, create our file
         f = open(config_dir + os.sep + "ha-config", "a")
