@@ -64,7 +64,7 @@ aws s3 cp s3://$bucketname/master/config/saltmaster_config /etc/salt/master
 ln -s /root/saltconf2015/phoenix/pillar /srv/pillar
 ln -s /root/saltconf2015/phoenix/salt /srv/salt
 ln -s /root/saltconf2015/phoenix/salt/reactor /srv/reactor
-ln -s /root/saltconf2015/phoenix/salt/runners /srv/salt/runners
+#ln -s /root/saltconf2015/phoenix/salt/runners /srv/salt/runners
 
 # restart salt-master to pick up any master config file changes
 service salt-master restart
@@ -73,7 +73,7 @@ service salt-master restart
 ## and run it passing in params just like any minion receives
 aws s3 cp s3://$bucketname/minion/scripts/saltminion_bootstrap.py .
 chmod +x saltminion_bootstrap.py
-/usr/bin/python ./saltminion_bootstrap.py $bucketname $grainsfile
+/usr/bin/python ./saltminion_bootstrap.py $bucketname $grainsfile $master_table
 
 # get our instanceid
 myid='curl http://169.254.169.254/latest/meta-data/instance-id/'
@@ -87,8 +87,12 @@ salt-call --local state.highstate
 # Download instance_manager.py
 mkdir -p /usr/local/bin/phoenix
 aws s3 cp s3://$bucketname/minion/scripts/sqs.py /usr/local/bin/phoenix
+aws s3 cp s3://$bucketname/minion/scripts/helper.py /usr/local/bin/phoenix
+aws s3 cp s3://$bucketname/minion/scripts/ddb.py /usr/local/bin/phoenix
 aws s3 cp s3://$bucketname/minion/scripts/msg.py /usr/local/bin/phoenix
-aws s3 cp s3://$bucketname/minion/scripts/key_deleter.py /usr/local/bin/phoenix
+aws s3 cp s3://$bucketname/minion/scripts/key_manager.py /usr/local/bin/phoenix
+aws s3 cp s3://$bucketname/minion/scripts/key_runner.py /usr/local/bin/phoenix
+aws s3 cp s3://$bucketname/minion/scripts/highstate_runner.py /usr/local/bin/phoenix
 aws s3 cp s3://$bucketname/minion/scripts/instance_manager.py /usr/local/bin/phoenix
 aws s3 cp s3://$bucketname/minion/scripts/instance_manager.conf /etc/init/instance_manager.conf
 chmod +x /usr/local/bin/phoenix/instance_manager.py

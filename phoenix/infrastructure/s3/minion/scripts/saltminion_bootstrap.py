@@ -17,8 +17,6 @@ commands = [
                 ['pip', 'install', '--upgrade', 'dynamodb-mapper'],
                 ['mkdir', '-p', '/usr/local/bin/phoenix'],
                 ['aws', 's3', 'cp', 's3://BUCKET/minion/scripts/master_list_manager.py', '/usr/local/bin/phoenix'],
-                ['aws', 's3', 'cp', 's3://BUCKET/minion/scripts/ddb.py', '/usr/local/bin/phoenix'],
-                ['aws', 's3', 'cp', 's3://BUCKET/minion/scripts/helper.py', '/usr/local/bin/phoenix'],
                 ['aws', 's3', 'cp', 's3://BUCKET/minion/scripts/master_list_manager.conf', '/etc/init/'],
                 ['aws', 's3', 'cp', 's3://BUCKET/minion/grains_files/GRAINS_FILE', '/etc/salt/grains'],
                 ['service', 'master_list_manager', 'start'],
@@ -59,10 +57,14 @@ def write_config_file(bucket, masters_table):
   config_dir = CONFIG_DIR
   mydict = {'bucket': bucket, 'masters_table': masters_table}
   try:
-    os.mkdir(config_dir)
-    f = open(config_dir + os.sep + "ha-config", "w")
-    for k,v in mydict.items():
-      f.write(k + ":" + v + "\n")
+    if not os.direxists(config_dir):
+        os.mkdir(config_dir)
+    my_file_path = config_dir + os.sep + "ha-config"
+    if not os.path.exists(my_file_path):  # means we're not on a salt-master, create our file
+        f = open(config_dir + os.sep + "ha-config", "a")
+        for k,v in mydict.items():
+          f.write(k + ":" + v + "\n")
+        f.close()
   except:
     raise
   return
