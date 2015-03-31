@@ -15,6 +15,7 @@ commands = [
                 ['apt-get', 'install', '-y', 'salt-minion', 'python-requests', 'python-pip'],
                 ['aws', 's3', 'cp', 's3://BUCKET/minion/config/minion_config', '/etc/salt/minion'],
                 ['pip', 'install', '--upgrade', 'dynamodb-mapper'],
+                ['pip', 'install', '--upgrade', 'docopt'],
                 ['mkdir', '-p', '/usr/local/bin/phoenix'],
                 ['aws', 's3', 'cp', 's3://BUCKET/minion/scripts/master_list_manager.py', '/usr/local/bin/phoenix'],
                 ['aws', 's3', 'cp', 's3://BUCKET/minion/scripts/helper.py', '/usr/local/bin/phoenix'],
