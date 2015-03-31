@@ -1,0 +1,10 @@
+Items.
+
+1.  Clean up cron script for salt masters
+scan masters table, and remove entries with status="TERMINATE", that are older than 24 hours
+scan minions table, and remove entries with status="TERMINATE", that are older than 24 hours
+
+2.  New utility script to query dynamodb periodically and populate roster files for ssh access to all servers by grains
+
+3.  
+
