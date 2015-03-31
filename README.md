@@ -1,10 +1,10 @@
 # Phoenix
 
-There is now one solution (solution three) aka The Phoenix. 
+This repository contains software for a new open source project - Phoenix. 
 
-In this project every salt-master runs a salt-minion.  This allows an administrator to log onto any salt master and run states / execution modules against all servers.
+In this project every salt-master runs a salt-minion.  This allows an administrator to log onto one salt master and run states / execution modules against all servers.
 
-AutoScaling groups launch new salt masters and minions as needed.  
+AutoScaling groups launch new salt masters and minions as needed, according to auto-scaling policies.  
 
 The salt masters list and salt minions list are now fully dynamic, with data about both stored in dynamodb.
 
@@ -31,3 +31,5 @@ Custom Code - instance_manager.py
 
 Master list updated on minions managed by:
 Custom Code - master_list_manager.py
+
+NOTE:  Due to how saltstack handles multi-master minion connections the default minion config uses a setting "master_type: failover".  The net effect is that all minions use one salt-master.  When that master becomes unavailable they switch to the next master in listed in the minion config file, trying each master listed until working successfully with a master.  The list of masters in the minion config file is maintained by master_list_manager.py, run as an ubuntu startup script.  It produces an ordered list from the dynamodb masters table.
