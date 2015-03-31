@@ -37,7 +37,7 @@ class MasterListManager:
                 master_ipaddrs.append(str(m.ipaddr))
         except Exception, e:
             raise
-        return master_ipaddrs
+        return sorted(master_ipaddrs)
         
     def update_config(self, masters_list):
         '''update CONFIG_FILE with active salt masters if needed'''
