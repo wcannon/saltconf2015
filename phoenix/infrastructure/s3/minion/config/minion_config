@@ -149,7 +149,6 @@
 
 # Ping Master to ensure connection is alive (minutes).
 #ping_interval: 0
-ping_interval: 1
 
 # To auto recover minions if master changes IP address (DDNS)
 #    auth_tries: 10
@@ -587,3 +586,4 @@ ping_interval: 1
 ############################################
 # Location of the repository cache file on the master:
 #win_repo_cachefile: 'salt://win/repo/winrepo.p'
+master_type: failover
