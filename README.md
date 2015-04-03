@@ -1,6 +1,8 @@
 # Phoenix
 
-This repository contains software for a new open source project - Phoenix. 
+This repository contains software for a new open source project - Phoenix.  The objective of this project is to make it relatively easy to run SaltStack in a highly available manner in the AWS cloud.  
+
+When a salt master is terminated it should be replaced automatically, picking up where it left off.  When the population of salt masters changes minions automatically update their list of salt masters and restart their salt-minion service.  
 
 In this project every salt-master runs a salt-minion.  This allows an administrator to log onto one salt master and run states / execution modules against all servers.
 
