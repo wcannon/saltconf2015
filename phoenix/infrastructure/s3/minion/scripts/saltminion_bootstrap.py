@@ -62,7 +62,7 @@ def run_substitutions(list_of_strs, old, new):
 def write_config_file(bucket, masters_table):
   '''Write a file that can be referenced by other scripts during ec2 instance lifetime'''
   config_dir = CONFIG_DIR
-  mydict = {'bucket': bucket, 'masters_table': masters_table}
+  mydict = {'bucket': bucket, 'master_table': masters_table}
   try:
     if not os.path.exists(config_dir):
         os.makedirs(config_dir)
@@ -70,7 +70,7 @@ def write_config_file(bucket, masters_table):
     if not os.path.exists(my_file_path):  # means we're not on a salt-master, create our file
         f = open(config_dir + os.sep + "ha-config", "a")
         for k,v in mydict.items():
-          f.write(k + ":" + v + "\n")
+          f.write(k + ": " + v + "\n")
         f.close()
   except:
     raise

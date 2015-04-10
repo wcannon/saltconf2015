@@ -1,0 +1,1 @@
+Runners are actually copied from s3/minion/scripts into /usr/local/bin/phoenix of server.  This dir is added to the master config

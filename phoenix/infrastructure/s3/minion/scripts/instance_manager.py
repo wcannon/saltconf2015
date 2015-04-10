@@ -246,9 +246,9 @@ def main():
                     #print message_body
                     msg = Msg(message_body)
                     instance_id = msg.get_instance_id()
-                    #print "MINION: instance_id: %s" % instance_id
+                    print "MINION: instance_id: %s" % instance_id
                     status = msg.get_instance_action() # LAUNCH or TERMINATE or None
-                    #print "MINION: status: %s" % status
+                    print "MINION: status: %s" % status
                     if not status or not instance_id:
                         #print "status: %s" % status
                         #print "instance_id: %s" % instance_id
@@ -258,6 +258,7 @@ def main():
                         minion_mgr.create_or_update_minion(instanceid=instance_id, modified=None, highstate_runner=None,
                                                            highstate_ran=None, status=unicode(status))
                     sqs_minion.delete_a_message(message)
+                    print "removed sqs message about minion"
         except Exception, e:
             print "Error handling minion instances: %s" % e
             raise

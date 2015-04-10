@@ -11,8 +11,7 @@
       "MinLength": "1",
       "MaxLength": "128",
       "AllowedPattern" : "[-_ a-zA-Z0-9]*",
-      "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores.",
-      "Default" : "saltconf2015-solution-3"
+      "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores."
     }
 
   },
@@ -41,7 +40,7 @@
           "ReadCapacityUnits" : "1",
           "WriteCapacityUnits" : "1"
         },
-        "TableName" : "minions"
+        "TableName" : {"Fn::Join" : ["-", [ {"Ref":"AWS::StackName"}, "dynamodb", "minions" ] ] }
       }
     }, 
    "DynamoDBTableMaster" : {
@@ -63,7 +62,7 @@
           "ReadCapacityUnits" : "1",
           "WriteCapacityUnits" : "1"
         },
-        "TableName" : "masters"
+        "TableName" : {"Fn::Join" : ["-", [ {"Ref":"AWS::StackName"}, "dynamodb", "masters" ] ]}
       }       
     }, 
 
@@ -72,7 +71,7 @@
       "Type": "AWS::SQS::Queue",
       "Properties": {
          "DelaySeconds": "0",
-         "QueueName": "SqsMinion"
+         "QueueName" : {"Fn::Join" : ["-", [ {"Ref":"AWS::StackName"}, "sqs", "minion" ] ]}
       }
     },
   "SqsMaster" :
@@ -80,7 +79,7 @@
       "Type": "AWS::SQS::Queue",
       "Properties": {
          "DelaySeconds": "0",
-         "QueueName": "SqsMaster"
+         "QueueName" : { "Fn::Join" : ["-", [ {"Ref":"AWS::StackName"}, "sqs", "master" ] ] }
       }
     },
   "SqsPolicyMinion":{
@@ -139,8 +138,8 @@
           "Subscription" : [
              { "Endpoint" : { "Fn::GetAtt" : ["SqsMinion", "Arn"]}, "Protocol" : "sqs" }
           ],
-          "TopicName" : "SnsMinion",
-          "DisplayName" : "SnsMinion"
+          "TopicName" : { "Fn::Join" : ["-", [ {"Ref":"AWS::StackName"}, "SnsTopic", "minion" ] ] } ,
+          "DisplayName" : { "Fn::Join" : ["-", [ {"Ref":"AWS::StackName"}, "SnsDisplayName", "minion" ] ] }
        }
     },
     
@@ -150,8 +149,8 @@
           "Subscription" : [
              { "Endpoint" : { "Fn::GetAtt" : ["SqsMaster", "Arn"]}, "Protocol" : "sqs" }
           ],
-          "TopicName" : "SnsMaster",
-          "DisplayName" : "SnsMaster"
+          "TopicName" : { "Fn::Join" : ["-", [ {"Ref":"AWS::StackName"}, "SnsTopic", "master" ] ] } ,
+          "DisplayName" : { "Fn::Join" : ["-", [ {"Ref":"AWS::StackName"}, "SnsDisplayName", "master" ] ] }
        }
     },
 
@@ -161,7 +160,7 @@
        "AccessControl" : "Private",
        "BucketName" : { "Ref" : "BucketName"},
        "Tags" : [ 
-                 { "Key" : "Purpose", "Value" :  "SaltConf2015-SolutionThree" }
+                 { "Key" : "Purpose", "Value" :  { "Fn::Join" : ["-", [ {"Ref":"AWS::StackName"}, {"Ref":"BucketName"} ] ] } }
                 ]
       }
     },
@@ -203,8 +202,10 @@
                     {
                      "Effect": "Allow",
                      "Action": "s3:*",
-                     "Resource": ["arn:aws:s3:::saltconf2015-solution-3",
-                                  "arn:aws:s3:::saltconf2015-solution-3/*"]
+                     "Resource": [
+                                  {"Fn::Join" : ["/", [  {"Fn::Join" : [":::", [ "arn:aws:s3", {"Ref":"BucketName"}] ] }, "*" ] ]},
+                                                         {"Fn::Join" : [":::", [ "arn:aws:s3", {"Ref":"BucketName"}] ] }
+                                 ]
                     },
                     {"Effect": "Allow",
                      "Action": "s3:ListAllMyBuckets",
@@ -241,7 +242,10 @@
           {
             "Effect": "Allow",
             "Action": [ "s3:*" ],
-            "Resource": ["arn:aws:s3:::saltconf2015-solution-3", "arn:aws:s3:::saltconf2015-solution-3/*"]
+            "Resource": [
+                         {"Fn::Join" : ["/", [  {"Fn::Join" : [":::", [ "arn:aws:s3", {"Ref":"BucketName"}] ] }, "*" ] ]},
+                                                {"Fn::Join" : [":::", [ "arn:aws:s3", {"Ref":"BucketName"}] ] }
+                        ]
           },
           {"Effect": "Allow",
             "Action": [ "s3:ListAllMyBuckets" ],
@@ -280,8 +284,10 @@
                     {
                      "Effect": "Allow",
                      "Action": "s3:*",
-                     "Resource": ["arn:aws:s3:::saltconf2015-solution-3/minion",
-                                  "arn:aws:s3:::saltconf2015-solution-3/minion/*"]
+                     "Resource": [
+                         {"Fn::Join" : ["/", [  {"Fn::Join" : [ ":::", [ "arn:aws:s3", {"Ref":"BucketName"}] ]}, "minion" ] ]},
+                         {"Fn::Join" : ["/", [  {"Fn::Join" : [ ":::", [ "arn:aws:s3", {"Ref":"BucketName"}] ]} , "minion/*" ] ]}
+                        ]
                     },
                     {"Effect": "Allow",
                      "Action": "s3:ListAllMyBuckets",
@@ -310,11 +316,11 @@
 },
   
   "Outputs" : {
-   "S3SaltConf2015Bucket" : {
+   "DevopsBucket" : {
       "Value" : { "Fn::Join" : [
          "", [ "https://", { "Fn::GetAtt" : [ "S3Bucket", "DomainName" ] } ]
       ] },
-      "Description" : "Name of S3 bucket for saltconf 2015 solution 2"
+      "Description" : "Name of S3 bucket"
    },
    "RoleMaster" : {
       "Value" : { "Ref": "RoleMaster"},

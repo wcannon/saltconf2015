@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from datetime import datetime
 from dynamodb_mapper.model import DynamoDBModel, utc_tz, ConnectionBorg
+from helper import Helper
 
 #http://dynamodb-mapper.readthedocs.org/en/latest/api/model.html#data-models
 def set_region(region_name):
@@ -13,7 +14,10 @@ def set_region(region_name):
   return
 
 class MinionInstance(DynamoDBModel):
-  __table__ = u"minions"
+  h = Helper()
+  #__table__ = u"minions"
+  #__table__ = u"hpulse-static-devops-minions"
+  __table__ = h.get_minion_table_name()
   __hash_key__ = u"instanceid"
   __schema__ = {
     u"instanceid": unicode,
@@ -31,7 +35,8 @@ class MinionInstance(DynamoDBModel):
      }
 
 class MasterInstance(DynamoDBModel):
-  __table__ = u"masters"
+  h = Helper()
+  __table__ = h.get_master_table_name()
   __hash_key__ = u"instanceid"
   __schema__ = {
     u"instanceid": unicode,

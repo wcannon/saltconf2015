@@ -1,5 +1,6 @@
 #!/bin/bash
 ## This script should install the saltstack master, and then call the bootstrap script for the saltstack minion
+## example run:  /saltmaster_bootstrap.sh hpulse-static-devops-bucket us-west-2  minions masters saltmaster  minions  masters  wcannon  'password1'  'DenisBajet/SuperDevops.git' wcannon  'password2'  'wcannon/devops-pillar.git'
 
 # These parameters are passed in via aws auto scaling
 bucketname=$1
@@ -9,7 +10,28 @@ queuename_master=$4
 grainsfile=$5
 minion_table=$6
 master_table=$7
+states_git_user=$8
+states_git_password=$9
+states_git_url=${10}
+pillar_git_user=${11}
+pillar_git_password=${12}
+pillar_git_url=${13}
 
+#echo "bucketname: $bucketname"
+#echo "region: $region"
+#echo "minion queue: $queuename_minion"
+#echo "master queue: $queuename_master"
+#echo "grainsfile: $grainsfile"
+#echo "minion_table: $minion_table"
+#echo "master_table: $master_table"
+#echo "states_git_user: $states_git_user"
+#echo "states_git_password: $states_git_password"
+#echo "states_git_url: $states_git_url"
+#echo "pillar_git_user: $pillar_git_user"
+#echo "pillar_git_password: $pillar_git_password"
+#echo "pillar_git_url: $pillar_git_url"
+
+#sleep 30
 # set up ppa for saltstack
 add-apt-repository -y ppa:saltstack/salt
 apt-get update
@@ -34,6 +56,12 @@ echo "queuename_minion: $queuename_minion" >> /etc/salt/ha/ha-config
 echo "queuename_master: $queuename_master" >> /etc/salt/ha/ha-config
 echo "minion_table: $minion_table" >> /etc/salt/ha/ha-config
 echo "master_table: $master_table" >> /etc/salt/ha/ha-config
+echo "states_git_user: $states_git_user" >> /etc/salt/ha/ha-config
+echo "states_git_password: $states_git_password" >> /etc/salt/ha/ha-config
+echo "states_git_url: $states_git_url" >> /etc/salt/ha/ha-config
+echo "pillar_git_user: $pillar_git_user" >> /etc/salt/ha/ha-config
+echo "pillar_git_passwrod: $pillar_git_password" >> /etc/salt/ha/ha-config
+echo "pillar_git_url: $pillar_git_url" >> /etc/salt/ha/ha-config
 
 # Check to see if our saltmaster.pem file exists by doing a simple ls on the expected location
 # If not, we are the first saltmster, and will push our keys into the bucket
@@ -54,17 +82,19 @@ else
   aws s3 cp /etc/salt/pki/master/master.pub s3://$bucketname/master/master.pub
 fi
 
-# Need to git clone the repo locally so that a highstate can run on the salt-master
-git clone https://github.com/wcannon/saltconf2015.git  /root/saltconf2015
+# Need to git clone the states repo locally so that a highstate can run on the salt-master
+git clone https://$states_git_user:$states_git_password@github.com/$states_git_url  /root/saltconf2015
+
+# Need to git clone the pillar repo locally so that secrets and configs are available on the salt-master
+git clone https://$pillar_git_user:$pillar_git_password@github.com/$pillar_git_url  /root/pillar
 
 # Copy in master config
 aws s3 cp s3://$bucketname/master/config/saltmaster_config /etc/salt/master
 
 # create symlinks
-ln -s /root/saltconf2015/phoenix/pillar /srv/pillar
-ln -s /root/saltconf2015/phoenix/salt /srv/salt
-ln -s /root/saltconf2015/phoenix/salt/reactor /srv/reactor
-#ln -s /root/saltconf2015/phoenix/salt/runners /srv/salt/runners
+ln -s /root/saltconf2015/pillar/ /srv/pillar
+ln -s /root/saltconf2015/salt /srv/salt
+ln -s /root/saltconf2015/salt/reactor/ /srv/reactor
 
 # restart salt-master to pick up any master config file changes
 service salt-master restart

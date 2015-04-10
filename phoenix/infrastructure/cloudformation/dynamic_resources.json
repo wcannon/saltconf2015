@@ -9,36 +9,32 @@
       "Description" : "Name of the sns service for autoscaling messages of Salt Masters",
       "Type" : "String",
       "MinLength": "1",
-      "MaxLength": "128",
-      "Default" : "arn:aws:sns:us-east-1:012800249358:SnsMaster"
+      "MaxLength": "128"
     },
 
     "SnsMinion" : {
       "Description" : "Name of the sns service for autoscaling messages of Salt Minions",
       "Type" : "String",
       "MinLength": "1",
-      "MaxLength": "128",
-      "Default" : "arn:aws:sns:us-east-1:012800249358:SnsMinion"
+      "MaxLength": "128"
     },
 
     "QueueMinion" : {
       "Description" : "Name of an existing sqs queue",
       "Type" : "String",
       "MinLength": "1",
-      "MaxLength": "256",
-      "Default" : "SqsMinion"
+      "MaxLength": "256"
     },
 
     "QueueMaster" : {
       "Description" : "Name of an existing sqs queue",
       "Type" : "String",
       "MinLength": "1",
-      "MaxLength": "256",
-      "Default" : "SqsMaster"
+      "MaxLength": "256"
     },
 
     "KeyName" : {
-      "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the bastion host",
+      "Description" : "Name of an existing EC2 KeyPair to enable SSH access",
       "Type" : "String",
       "MinLength": "1",
       "MaxLength": "64",
@@ -49,8 +45,7 @@
     "Region" : {
        "Description" : "Name of an AWS region",
        "Type": "String",
-       "AllowedValues" : [ "us-east-1", "us-west-1", "us-west-2", "eu-west-1", "ap-southeast-1", "ap-southeast-2", "ap-northeast-1", "sa-east-1", "eu-central-1"],
-       "Default" : "us-east-1"
+       "AllowedValues" : [ "us-east-1", "us-west-1", "us-west-2", "eu-west-1", "ap-southeast-1", "ap-southeast-2", "ap-northeast-1", "sa-east-1", "eu-central-1"]
     },
 
     "SSHFrom" : {
@@ -66,20 +61,17 @@
     "InstanceType" : {
       "Description" : "Size of an instance",
       "Type" : "String",
-      "AllowedValues" : [ "t2.small", "m3.medium", "m3.large", "m3.xlarge"],
-      "Default" : "t2.small"
+      "AllowedValues" : [ "t2.small", "m3.medium", "m3.large", "m3.xlarge"]
     },
 
     "InstanceProfileMaster" : {
       "Description" : "The IAM instance profile to use for SaltMasters - S3, SQS",
-      "Type" : "String",
-      "Default" : "project1-static-resources-InstanceProfileMaster-INE9ATQ2OFFP"
+      "Type" : "String"
     },
 
     "InstanceProfileMinion" : {
       "Description" : "The IAM instance profile for SaltMinions - S3",
-      "Type" : "String",
-      "Default" : "project1-static-resources-InstanceProfileMinion-1L9KD571JXQNE"
+      "Type" : "String"
     },
 
     "BucketName" : {
@@ -88,8 +80,7 @@
       "MinLength": "1",
       "MaxLength": "128",
       "AllowedPattern" : "[-_ a-zA-Z0-9]*",
-      "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores.",
-      "Default" : "saltconf2015-solution-3"
+      "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores."
     },
     "MinionTable" : {
       "Description" : "Name of the dynamodb table used for minion instance information",
@@ -97,8 +88,7 @@
       "MinLength": "1",
       "MaxLength": "128",
       "AllowedPattern" : "[-_ a-zA-Z0-9]*",
-      "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores.",
-      "Default" : "minions"
+      "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores."
     },
     "MasterTable" : {
       "Description" : "Name of the dynamodb table used for master instance information",
@@ -106,9 +96,51 @@
       "MinLength": "1",
       "MaxLength": "128",
       "AllowedPattern" : "[-_ a-zA-Z0-9]*",
-      "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores.",
-      "Default" : "masters"
+      "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores."
+    },
+    "StatesGitUsername" : {
+      "Description" : "Name of the user to connect to github",
+      "Type" : "String",
+      "MinLength": "1",
+      "MaxLength": "128",
+      "AllowedPattern" : "[-_ a-zA-Z0-9]*",
+      "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores."
+    },
+    "StatesGitPassword" : {
+      "Description" : "Password for GitUsername user to use at github. This info will not be included in CF output.",
+      "Type" : "String",
+      "MinLength": "1",
+      "MaxLength": "128",
+      "NoEcho" : "True"
+    },
+    "StatesGitHttpURL" : {
+      "Description" : "URL of github repo used to clone the repository",
+      "Type" : "String",
+      "MinLength": "1",
+      "MaxLength": "1024"
+    },
+    "PillarGitUsername" : {
+      "Description" : "Name of the user to connect to github",
+      "Type" : "String",
+      "MinLength": "1",
+      "MaxLength": "128",
+      "AllowedPattern" : "[-_ a-zA-Z0-9]*",
+      "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores."
+    },
+    "PillarGitPassword" : {
+      "Description" : "Password for GitUsername user to use at github. This info will not be included in CF output.",
+      "Type" : "String",
+      "MinLength": "1",
+      "MaxLength": "128",
+      "NoEcho" : "True"
+    },
+    "PillarGitHttpURL" : {
+      "Description" : "URL of github repo used to clone the repository",
+      "Type" : "String",
+      "MinLength": "1",
+      "MaxLength": "1024"
     }
+
 
   },
 
@@ -399,7 +431,7 @@
           "pip install --upgrade boto\n",
           "aws s3 cp s3://", {"Ref":"BucketName"}, "/master/scripts/saltmaster_bootstrap.sh . \n",
           "chmod +x saltmaster_bootstrap.sh\n",
-          "/bin/bash ./saltmaster_bootstrap.sh ",{"Ref":"BucketName"}," ",{"Ref":"Region"}," ",{"Ref":"QueueMinion"}," ",{"Ref":"QueueMaster"}," "," saltmaster", " ", {"Ref":"MinionTable"}, " ", {"Ref":"MasterTable"}, "\n"
+          "/bin/bash ./saltmaster_bootstrap.sh ",{"Ref":"BucketName"}," ",{"Ref":"Region"}," ",{"Ref":"QueueMinion"}," ",{"Ref":"QueueMaster"}," "," saltmaster", " ", {"Ref":"MinionTable"}, " ", {"Ref":"MasterTable"}, " ", {"Ref":"StatesGitUsername"}, " ", "'",{"Ref":"StatesGitPassword"},"'", " ",{"Ref":"StatesGitHttpURL"}, " ", {"Ref":"PillarGitUsername"}, " ","'",{"Ref":"PillarGitPassword"},"'", " ",{"Ref":"PillarGitHttpURL"},"\n"
         ]]}}
    }
  },
@@ -407,7 +439,9 @@
   "GroupMaster" : {
     "Type" : "AWS::AutoScaling::AutoScalingGroup",
     "Properties" : {
-      "AvailabilityZones" : ["us-east-1a"],
+      "AvailabilityZones" : [{ "Fn::FindInMap" : [ "VpcIpMap", { "Ref" : "Region"} , "az1" ]},
+                             { "Fn::FindInMap" : [ "VpcIpMap", { "Ref" : "Region"} , "az2" ]}
+                            ],
       "LaunchConfigurationName" : { "Ref" : "LaunchConfigMaster" },
       "MinSize" : "1",
       "MaxSize" : "1",
@@ -419,9 +453,7 @@
                 { "Key" : "region", "Value" : { "Ref" : "Region" }, "PropagateAtLaunch":"true"  },
                 { "Key" : "Name", "Value" : "SaltMaster", "PropagateAtLaunch":"true"  }
                ],
-      "VPCZoneIdentifier" : [
-         { "Ref" : "AZ1AdminSubnet"} 
-       ]
+       "VPCZoneIdentifier" : [ { "Ref" : "AZ1AdminSubnet"}, { "Ref" : "AZ2AdminSubnet"} ] 
     }
   },
 
@@ -466,7 +498,9 @@
   "GroupMinion" : {
       "Type" : "AWS::AutoScaling::AutoScalingGroup",
       "Properties" : {
-        "AvailabilityZones" : ["us-east-1a", "us-east-1c"], 
+        "AvailabilityZones" : [{ "Fn::FindInMap" : [ "VpcIpMap", { "Ref" : "Region"} , "az1" ]},
+                               { "Fn::FindInMap" : [ "VpcIpMap", { "Ref" : "Region"} , "az2" ]}
+                              ],
          "LaunchConfigurationName" : 
              { "Ref" : "LaunchConfigMinion" }, 
                "MinSize" : "1", 
