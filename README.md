@@ -35,3 +35,9 @@ Master list updated on minions managed by:
 Custom Code - master_list_manager.py
 
 NOTE:  Due to how saltstack handles multi-master minion connections the default minion config uses a setting "master_type: failover".  The net effect is that all minions use one salt-master.  When that master becomes unavailable they switch to the next master in listed in the minion config file, trying each master listed until working successfully with a master.  The list of masters in the minion config file is maintained by master_list_manager.py, run as an ubuntu startup script.  It produces an ordered list from the dynamodb masters table.
+
+UPDATES:
+- default parameters to cloudformation templates have been removed
+- cloud formation templates have been made region aware - meaning individual availablity zones are no longer hard coded
+- multiple environments are now easier to support as github repos for pillar and states are now cloudformation parameters (e.g. different github pillar repos for production versus qa, can re-use the salt states github repo)
+- code updates / various fixes
