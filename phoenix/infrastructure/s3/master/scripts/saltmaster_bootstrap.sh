@@ -60,7 +60,7 @@ echo "states_git_user: $states_git_user" >> /etc/salt/ha/ha-config
 echo "states_git_password: $states_git_password" >> /etc/salt/ha/ha-config
 echo "states_git_url: $states_git_url" >> /etc/salt/ha/ha-config
 echo "pillar_git_user: $pillar_git_user" >> /etc/salt/ha/ha-config
-echo "pillar_git_passwrod: $pillar_git_password" >> /etc/salt/ha/ha-config
+echo "pillar_git_password: $pillar_git_password" >> /etc/salt/ha/ha-config
 echo "pillar_git_url: $pillar_git_url" >> /etc/salt/ha/ha-config
 
 # Check to see if our saltmaster.pem file exists by doing a simple ls on the expected location
